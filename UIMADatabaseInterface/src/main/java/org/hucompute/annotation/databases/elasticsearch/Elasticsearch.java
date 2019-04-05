@@ -1,7 +1,7 @@
 package org.hucompute.annotation.databases.elasticsearch;
 
 /*
- * Copyright 2017
+ * Copyright 2019
  * Texttechnology Lab
  * Goethe-Universität Frankfurt am Main
  *
