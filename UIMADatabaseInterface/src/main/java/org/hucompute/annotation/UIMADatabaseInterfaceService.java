@@ -28,6 +28,7 @@ import org.hucompute.ultilities.mongo.serilization.exceptions.UnknownFactoryExce
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -94,7 +95,7 @@ public interface UIMADatabaseInterfaceService {
      * @throws SerializerInitializationException
      * @throws UnknownFactoryException
      */
-    void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException;
+    void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, IOException;
 
     /**
      * Return a JCas based on its database ID.
@@ -102,7 +103,7 @@ public interface UIMADatabaseInterfaceService {
      * @param sID
      * @return
      */
-    JCas getElement(String sID);
+    JCas getElement(String sID) throws IOException;
 
     /**
      * Select JCas elements based on a generic query.
