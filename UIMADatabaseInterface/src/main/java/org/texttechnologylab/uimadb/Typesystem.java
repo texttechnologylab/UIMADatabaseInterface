@@ -1,4 +1,4 @@
-package org.hucompute.annotation;
+package org.texttechnologylab.uimadb;
 
 /*
  * Copyright 2017

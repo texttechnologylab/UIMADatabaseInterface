@@ -1,4 +1,4 @@
-package org.hucompute.annotation.databases.neo4j;
+package org.texttechnologylab.uimadb.databases.neo4j;
 
 /*
  * Copyright 2017
@@ -20,7 +20,6 @@ package org.hucompute.annotation.databases.neo4j;
  */
 
 import com.vividsolutions.jts.geom.Coordinate;
-import org.hucompute.annotation.UIMADatabaseInterface;
 import org.neo4j.gis.spatial.SimplePointLayer;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.gis.spatial.pipes.GeoPipeFlow;
@@ -33,6 +32,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.schema.IndexCreator;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
+import org.texttechnologylab.uimadb.UIMADatabaseInterface;
 
 import java.io.File;
 import java.io.FileInputStream;

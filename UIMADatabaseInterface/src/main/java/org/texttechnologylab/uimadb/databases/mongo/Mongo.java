@@ -1,4 +1,4 @@
-package org.hucompute.annotation.databases.mongo;
+package org.texttechnologylab.uimadb.databases.mongo;
 
 /*
  * Copyright 2017
@@ -25,23 +25,25 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import org.apache.commons.collections.KeyValue;
+import org.apache.commons.io.FileUtils;
 import org.apache.uima.UIMAException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.bson.types.ObjectId;
-import org.hucompute.annotation.UIMADatabaseInterface;
-import org.hucompute.annotation.UIMADatabaseInterfaceService;
-import org.hucompute.ultilities.mongo.MongoConfig;
-import org.hucompute.ultilities.mongo.MongoConnection;
-import org.hucompute.ultilities.mongo.MongoHelper;
-import org.hucompute.ultilities.mongo.serilization.exceptions.CasSerializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.SerializerInitializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.UnknownFactoryException;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.texttechnologylab.uimadb.UIMADatabaseInterface;
+import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
+import org.texttechnologylab.uimadb.wrapper.mongo.MongoConfig;
+import org.texttechnologylab.uimadb.wrapper.mongo.MongoConnection;
+import org.texttechnologylab.uimadb.wrapper.mongo.MongoHelper;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -155,6 +157,26 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     @Override
     public void updateElement(DBObject pQuery, String sObject) {
         super.updateElement(pQuery, sObject);
+    }
+
+    @Override
+    public long getSize(String sID) {
+
+            DBObject tObject = null;
+
+            if(sID.contains("/")){
+                tObject = getDBElement(sID.substring(sID.lastIndexOf("/")+1));
+            }
+            else {
+                tObject = getDBElement(sID);
+            }
+
+            String json = JSON.serialize(tObject);
+
+            long length = json.getBytes(StandardCharsets.UTF_8).length;
+
+            return length;
+
     }
 
     @Override

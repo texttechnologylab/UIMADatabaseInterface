@@ -1,4 +1,4 @@
-package org.hucompute.annotation;
+package org.texttechnologylab.uimadb;
 
 /*
  * Copyright 2017
@@ -22,11 +22,11 @@ package org.hucompute.annotation;
 import org.apache.commons.collections.KeyValue;
 import org.apache.uima.UIMAException;
 import org.apache.uima.jcas.JCas;
-import org.hucompute.ultilities.mongo.serilization.exceptions.CasSerializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.SerializerInitializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.UnknownFactoryException;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.IOException;
 import java.util.Set;
@@ -104,6 +104,14 @@ public interface UIMADatabaseInterfaceService {
      * @return
      */
     JCas getElement(String sID) throws IOException;
+
+    /**
+     * Return this Size of the Document
+     *
+     * @param sID
+     * @return
+     */
+    long getSize(String sID) throws IOException;
 
     /**
      * Select JCas elements based on a generic query.

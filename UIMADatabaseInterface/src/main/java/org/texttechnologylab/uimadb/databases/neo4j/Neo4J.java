@@ -1,4 +1,4 @@
-package org.hucompute.annotation.databases.neo4j;
+package org.texttechnologylab.uimadb.databases.neo4j;
 
 /*
  * Copyright 2017
@@ -25,15 +25,15 @@ import org.apache.uima.UIMAException;
 import org.apache.uima.cas.Type;
 import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.jcas.JCas;
-import org.hucompute.annotation.UIMADatabaseInterface;
-import org.hucompute.annotation.UIMADatabaseInterfaceService;
-import org.hucompute.ultilities.mongo.serilization.exceptions.CasSerializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.SerializerInitializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.UnknownFactoryException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.neo4j.graphdb.*;
+import org.texttechnologylab.uimadb.UIMADatabaseInterface;
+import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.File;
 import java.util.*;
@@ -541,6 +541,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
             });
 
             n.delete();
+
             tx.success();
         }
 

@@ -1,4 +1,4 @@
-package org.hucompute.annotation.databases.neo4j;
+package org.texttechnologylab.uimadb.databases.neo4j;
 
 /*
  * Copyright 2017

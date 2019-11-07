@@ -1,4 +1,4 @@
-package org.hucompute.annotation;
+package org.texttechnologylab.uimadb;
 
 /*
  * Copyright 2017
@@ -30,15 +30,15 @@ import org.apache.uima.fit.testing.util.DisableLogging;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.*;
-import org.hucompute.ultilities.mongo.MongoSerialization;
-import org.hucompute.ultilities.mongo.serilization.CasSerializerMetaFactory;
-import org.hucompute.ultilities.mongo.serilization.ICasSerializer;
-import org.hucompute.ultilities.mongo.serilization.exceptions.CasSerializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.SerializerInitializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.UnknownFactoryException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.texttechnologylab.uimadb.wrapper.mongo.MongoSerialization;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.CasSerializerMetaFactory;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.ICasSerializer;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.util.*;
 

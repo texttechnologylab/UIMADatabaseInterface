@@ -1,4 +1,4 @@
-package org.hucompute.annotation.databases.elasticsearch;
+package org.texttechnologylab.uimadb.databases.elasticsearch;
 
 /*
  * Copyright 2019
@@ -19,31 +19,22 @@ package org.hucompute.annotation.databases.elasticsearch;
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-import com.vividsolutions.jts.geom.Coordinate;
 import org.apache.commons.collections.KeyValue;
-import org.apache.commons.io.FileUtils;
 import org.apache.uima.UIMAException;
-import org.apache.uima.cas.Type;
-import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.cas.CASRuntimeException;
 import org.apache.uima.jcas.JCas;
-import org.hucompute.annotation.UIMADatabaseInterface;
-import org.hucompute.annotation.UIMADatabaseInterfaceService;
-import org.hucompute.ultilities.mongo.serilization.exceptions.CasSerializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.SerializerInitializationException;
-import org.hucompute.ultilities.mongo.serilization.exceptions.UnknownFactoryException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Test;
-import org.neo4j.graphdb.*;
+import org.texttechnologylab.uimadb.UIMADatabaseInterface;
+import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 /**
  * Implementation of the UIMADatabaseInterfaceService to use a Neo4J instance.
@@ -117,6 +108,16 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public JCas createDummy(JCas pCas) throws UIMAException, JSONException {
+
+        try {
+            if (pCas.getView(UIMADatabaseInterface.UIMADBID) != null) {
+                return pCas;
+            }
+        }
+        catch (CASRuntimeException e){
+            System.out.println(e.getMessage());
+        }
+
         JSONObject newObject = new JSONObject();
 
         String result = null;
@@ -129,6 +130,8 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
         String oID = result;
         pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(oID);
+
+
         return pCas;
     }
 
@@ -248,7 +251,11 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public void destroy() {
-        connector.onClose();
+        try {
+            connector.onClose();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
