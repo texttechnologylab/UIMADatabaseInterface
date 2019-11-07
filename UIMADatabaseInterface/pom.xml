@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.hucompute.annotation</groupId>
+    <groupId>org.texttechnologylab.annotation</groupId>
     <artifactId>UIMADatabaseInterface</artifactId>
     <version>1.1</version>
 
@@ -54,10 +54,21 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <includes></includes>
+                    <excludes></excludes>
+                    <rulesUri>file://${basedir}/version-rules.xml</rulesUri>
                 </configuration>
             </plugin>
         </plugins>
