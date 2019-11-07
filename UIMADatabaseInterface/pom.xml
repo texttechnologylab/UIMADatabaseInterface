@@ -79,7 +79,7 @@
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
             <artifactId>Utilities</artifactId>
-            <version>1.0</version>
+            <version>1.0.1</version>
         </dependency>
 
 
@@ -102,11 +102,11 @@
             <artifactId>json</artifactId>
             <version>20180813</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.hucompute.utilities</groupId>-->
-<!--            <artifactId>mongo</artifactId>-->
-<!--            <version>1.0</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.hucompute.utilities</groupId>
+            <artifactId>mongo</artifactId>
+            <version>1.0</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.uima/uimaj-core -->
         <dependency>
