@@ -36,6 +36,7 @@ import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.Serial
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -188,6 +189,11 @@ public class Neo4J implements UIMADatabaseInterfaceService {
         }
         return null;
 
+    }
+
+    @Override
+    public long getSize(String sID) throws IOException {
+        return -1l;
     }
 
     @Override
