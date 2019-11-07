@@ -200,6 +200,11 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
     }
 
     @Override
+    public long getSize(String sID) throws IOException {
+        return 0;
+    }
+
+    @Override
     public Set<JCas> getElements(String sQuery) {
         return null;
     }
