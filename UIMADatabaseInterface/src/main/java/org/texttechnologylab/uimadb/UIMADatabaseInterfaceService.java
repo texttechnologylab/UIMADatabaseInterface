@@ -87,6 +87,8 @@ public interface UIMADatabaseInterfaceService {
      */
     void updateElement(JCas pJCas, JSONArray pAttributes) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException;
 
+    void updateElement(JCas pJCas, JSONArray pAttributes, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException;
+
     /**
      * Update a existing database JCas.
      *

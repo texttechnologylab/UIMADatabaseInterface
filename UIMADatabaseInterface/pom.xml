@@ -8,24 +8,7 @@
     <artifactId>UIMADatabaseInterface</artifactId>
     <version>1.1</version>
 
-    <distributionManagement>
-        <repository>
-            <id>hu-central</id>
-            <name>alba-releases</name>
-            <url>http://service.hucompute.org/artifactory/libs-snapshot-local</url>
-        </repository>
-        <snapshotRepository>
-            <id>hu-snapshots</id>
-            <name>alba-snapshots</name>
-            <url>http://service.hucompute.org/artifactory/libs-snapshot-local</url>
-        </snapshotRepository>
-    </distributionManagement>
     <repositories>
-        <repository>
-            <id>hu-central</id>
-            <name>alba-releases</name>
-            <url>http://service.hucompute.org/artifactory/libs-snapshot-local</url>
-        </repository>
         <repository>
             <id>neo4j-contrib-releases</id>
             <url>https://raw.github.com/neo4j-contrib/m2/master/releases</url>
@@ -113,14 +96,14 @@
         <dependency>
             <groupId>org.apache.uima</groupId>
             <artifactId>uimaj-core</artifactId>
-            <version>3.1.0</version>
+            <version>2.10.3</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.uima/uimafit-core -->
         <dependency>
             <groupId>org.apache.uima</groupId>
             <artifactId>uimafit-core</artifactId>
-            <version>3.0.0</version>
+            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.neo4j</groupId>
@@ -132,6 +115,12 @@
             <artifactId>neo4j-spatial</artifactId>
             <version>0.24-neo4j-3.1.1</version>
             <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.siemens.ct.exi</groupId>
+            <artifactId>exificient</artifactId>
+            <version>1.0.4</version>
         </dependency>
     </dependencies>
 

@@ -312,12 +312,29 @@ public class UIMADatabaseInterface {
      * @throws JSONException
      */
     public static String serializeJCas(JCas pInput) throws UnknownFactoryException, SerializerInitializationException, CasSerializationException, JSONException {
+        return serializeJCas(pInput, false);
+    }
+
+    /**
+     * Serialize a JCas Element
+     *
+     * @param pInput
+     * @return
+     * @throws UnknownFactoryException
+     * @throws SerializerInitializationException
+     * @throws CasSerializationException
+     * @throws JSONException
+     */
+    public static String serializeJCas(JCas pInput, boolean bCompress) throws UnknownFactoryException, SerializerInitializationException, CasSerializationException, JSONException {
 
         JSONArray tArray = new JSONArray();
         tArray.put(new JSONObject().put("geo", new JSONObject()));
 
-        return serializeJCas(pInput, tArray);
+        return serializeJCas(pInput, tArray, bCompress);
+    }
 
+    public static String serializeJCas(JCas pInput, JSONArray params) throws UnknownFactoryException, SerializerInitializationException, CasSerializationException, JSONException {
+        return serializeJCas(pInput, params, false);
     }
 
     /**
@@ -331,10 +348,10 @@ public class UIMADatabaseInterface {
      * @throws CasSerializationException
      * @throws JSONException
      */
-    public static String serializeJCas(JCas pInput, JSONArray params) throws UnknownFactoryException, SerializerInitializationException, CasSerializationException, JSONException {
+    public static String serializeJCas(JCas pInput, JSONArray params, boolean bCompress) throws UnknownFactoryException, SerializerInitializationException, CasSerializationException, JSONException {
 
         ICasSerializer serializer = CasSerializerMetaFactory.Instance().getFactory(MongoSerialization.getSerializerFactory()).createSerializer();
-        String s = serializer.serialize(pInput.getCas());
+        String s = serializer.serialize(pInput.getCas(), bCompress);
 
         JSONObject rObject = new JSONObject();
 
@@ -366,6 +383,7 @@ public class UIMADatabaseInterface {
 
         // original data
         rObject.put("uima", new JSONObject(s));
+        //rObject.put("uima", new JSONObject())
 
         s = rObject.toString();
 

@@ -148,7 +148,14 @@ public class Neo4J implements UIMADatabaseInterfaceService {
     }
 
     @Override
-    public void updateElement(JCas pJCas, JSONArray pAttributes) {
+    public void updateElement(JCas pJCas, JSONArray pAttributes) throws SerializerInitializationException, CasSerializationException, UnknownFactoryException {
+
+        updateElement(pJCas, pAttributes, false);
+
+    }
+
+    @Override
+    public void updateElement(JCas pJCas, JSONArray pAttributes, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String id = UIMADatabaseInterface.getID(pJCas);
 
         try {
@@ -165,8 +172,6 @@ public class Neo4J implements UIMADatabaseInterfaceService {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override

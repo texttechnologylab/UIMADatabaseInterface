@@ -1,26 +1,38 @@
 package org.texttechnologylab.uimadb.wrapper.mongo.serilization.json;
 
+import com.siemens.ct.exi.core.CodingMode;
+import com.siemens.ct.exi.core.EXIFactory;
+import com.siemens.ct.exi.core.exceptions.EXIException;
+import com.siemens.ct.exi.core.helpers.DefaultEXIFactory;
+import com.siemens.ct.exi.main.api.sax.EXIResult;
+import com.siemens.ct.exi.main.api.sax.EXISource;
 import org.apache.commons.io.IOUtils;
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.impl.XCASDeserializer;
 import org.apache.uima.cas.impl.XCASSerializer;
+import org.codehaus.plexus.util.StringInputStream;
+import org.codehaus.plexus.util.StringOutputStream;
 import org.json.JSONException;
 import org.json.JSONML;
 import org.json.JSONObject;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.ICasSerializer;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import javax.xml.transform.*;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
 
 public class CasJsonSerializer implements ICasSerializer {
 	Transformer	xcasToJson	= null;
 	Transformer	jsonToXCas	= null;
+
+    EXIFactory exiFactory = DefaultEXIFactory.newInstance();
 
 	private int	indent		= 0;
 
@@ -40,10 +52,14 @@ public class CasJsonSerializer implements ICasSerializer {
 		}
 	}
 
+        public String serialize(CAS doc) throws CasSerializationException {
+            return serialize(doc, false);
+        }
 
-	public String serialize(CAS doc) throws CasSerializationException {
+        public String serialize(CAS doc, boolean bCompress) throws CasSerializationException {
 		ByteArrayOutputStream outTmp = null;
 		ByteArrayInputStream inTmp = null;
+        exiFactory.setCodingMode(CodingMode.COMPRESSION);
 		try {
 			outTmp = new ByteArrayOutputStream();
 			XCASSerializer.serialize(doc, outTmp);
@@ -51,7 +67,24 @@ public class CasJsonSerializer implements ICasSerializer {
 			String originalXml = outTmp.toString();
 			outTmp.close();
 
-            JSONObject rJSON = JSONML.toJSONObject(originalXml);
+            JSONObject rJSON = new JSONObject();
+
+            // Compress
+            if(bCompress) {
+                StringOutputStream sos = new StringOutputStream();
+
+                EXIResult exiResult = new EXIResult(exiFactory);
+                exiResult.setOutputStream(sos);
+
+                XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+                xmlReader.setContentHandler(exiResult.getHandler());
+                xmlReader.parse(new InputSource(new StringReader(originalXml)));
+
+                rJSON = new JSONObject().put("compress", sos.toString());
+            }
+            else{
+                rJSON = JSONML.toJSONObject(originalXml);
+            }
 
             return rJSON.toString(indent);
 
@@ -92,6 +125,8 @@ public class CasJsonSerializer implements ICasSerializer {
 			throw new CasSerializationException(e);
 		} catch (JSONException e) {
             e.printStackTrace();
+        } catch (EXIException e) {
+            e.printStackTrace();
         } finally {
 			IOUtils.closeQuietly(outTmp);
 			IOUtils.closeQuietly(inTmp);
@@ -99,16 +134,43 @@ public class CasJsonSerializer implements ICasSerializer {
 		return "";
 	}
 
-	public void deserialize(CAS doc, String src)
+    @Override
+    public void deserialize(CAS doc, String src)
 		throws CasSerializationException {
 		ByteArrayInputStream inTmp = null;
 		ByteArrayOutputStream outTmp = null;
+        exiFactory.setCodingMode(CodingMode.COMPRESSION);
+
+
 		try {
 
             JSONObject pObject = new JSONObject(src);
             String s = JSONML.toString(pObject);
 
-            inTmp = new ByteArrayInputStream(s.getBytes());
+            if(pObject.has("compress")){
+                InputSource inputSource = new InputSource(new StringReader(pObject.getString("compress")));
+
+                SAXSource exiSource = new EXISource(exiFactory);
+                exiSource.setInputSource(inputSource);
+
+                StringWriter w = new StringWriter();
+                Result result = new StreamResult(w);
+
+                TransformerFactory tf = TransformerFactory.newInstance();
+                Transformer transformer = tf.newTransformer();
+                transformer.transform(exiSource, result);
+
+                inTmp = new ByteArrayInputStream(w.toString().getBytes());
+            }
+            else{
+                inTmp = new ByteArrayInputStream(s.getBytes());
+            }
+
+
+
+
+                //
+
 
             XCASDeserializer.deserialize(inTmp, doc);
 
@@ -130,6 +192,12 @@ public class CasJsonSerializer implements ICasSerializer {
 		} catch (IOException e) {
 			throw new CasSerializationException(e);
 		} catch (JSONException e) {
+            e.printStackTrace();
+        } catch (EXIException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
             e.printStackTrace();
         } finally {
 			IOUtils.closeQuietly(inTmp);

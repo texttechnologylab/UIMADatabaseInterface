@@ -31,7 +31,7 @@ public class SimpleFileTransformBuilder implements ITransformBuilder {
 		throws TransformerConfigurationException {
 		InputStream xsltStr = null;
 		try {
-			xsltStr = getClass().getResourceAsStream(resource);
+			xsltStr = getClass().getClassLoader().getResourceAsStream(resource);
 			return TransformerFactory.newInstance().newTransformer(
 				new StreamSource(xsltStr));
 		} finally {

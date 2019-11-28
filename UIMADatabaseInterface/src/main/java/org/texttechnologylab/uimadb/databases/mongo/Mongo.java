@@ -115,9 +115,14 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
     @Override
     public void updateElement(JCas pJCas, JSONArray pAttributes) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
+        updateElement(pJCas, pAttributes, false);
+    }
+
+    @Override
+    public void updateElement(JCas pJCas, JSONArray pAttributes, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String sString = null;
         try {
-            sString = UIMADatabaseInterface.serializeJCas(pJCas, pAttributes);
+            sString = UIMADatabaseInterface.serializeJCas(pJCas, pAttributes, bCompressed);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -137,6 +142,10 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
 
     public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
+        updateElement(pJCas, false);
+    }
+
+    public void updateElement(JCas pJCas, boolean pCompression) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
 
         String sString = null;
         try {
@@ -147,6 +156,26 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
         DBObject doc = (DBObject) JSON.parse(sString);
         String sID = UIMADatabaseInterface.getID(pJCas);
+
+        this.updateElement(dummyObject(sID), doc);
+
+    }
+
+    public void updateElement(JCas pJCas, String sID) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
+        updateElement(pJCas, sID, false);
+    }
+
+
+    public void updateElement(JCas pJCas, String sID, boolean pCompression) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
+
+        String sString = null;
+        try {
+            sString = UIMADatabaseInterface.serializeJCas(pJCas, pCompression);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        DBObject doc = (DBObject) JSON.parse(sString);
 
         this.updateElement(dummyObject(sID), doc);
 
@@ -183,18 +212,28 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         JCas rCas = null;
 
             DBObject tObject = null;
-
+            String sFinalID = "";
             if(sID.contains("/")){
-                tObject = getDBElement(sID.substring(sID.lastIndexOf("/")+1));
+                sFinalID = sID.substring(sID.lastIndexOf("/")+1);
+                tObject = getDBElement(sFinalID);
             }
             else {
-                tObject = getDBElement(sID);
+                sFinalID = sID;
+                tObject = getDBElement(sFinalID);
             }
 
             String json = JSON.serialize(tObject);
 
             try {
                 rCas = UIMADatabaseInterface.deserializeJCas(json);
+
+                try{
+                    rCas.getView(UIMADatabaseInterface.UIMADBID);
+                }
+                catch (Exception e){
+                    rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
+                }
+
             } catch (UIMAException e) {
                 e.printStackTrace();
             } catch (JSONException e) {

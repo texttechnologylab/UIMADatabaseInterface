@@ -7,7 +7,11 @@ import org.apache.uima.fit.factory.JCasFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.bson.types.ObjectId;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
+import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -16,9 +20,10 @@ import java.util.Set;
 /**
  * Created by abrami on 01.06.17.
  */
-public class MongoHelper {
+public abstract class MongoHelper {
 
     private DBCollection coll;
+
 
     public MongoHelper(MongoConfig mongoConfig) throws ResourceInitializationException {
 
@@ -35,6 +40,11 @@ public class MongoHelper {
        MongoConnection conn = mc;
        coll = conn.coll;
 
+    }
+
+    public MongoHelper(String sAdress, String mongoDatabase, String mongoCollection, String sUsername, String sPassword) throws ResourceInitializationException {
+        MongoConnection conn = new MongoConnection(sAdress, mongoDatabase, mongoCollection, sUsername, sPassword);
+        coll = conn.coll;
     }
 
 

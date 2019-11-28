@@ -162,6 +162,11 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
     }
 
     @Override
+    public void updateElement(JCas pJCas, JSONArray pAttributes, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
+
+    }
+
+    @Override
     public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, IOException {
 
         String sString = null;
