@@ -10,6 +10,11 @@
 
     <repositories>
         <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
             <id>neo4j-contrib-releases</id>
             <url>https://raw.github.com/neo4j-contrib/m2/master/releases</url>
             <releases>
@@ -20,15 +25,15 @@
             </snapshots>
         </repository>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-        <repository>
             <id>elastic-lucene-snapshots</id>
             <name>Elastic Lucene Snapshots</name>
             <url>https://s3.amazonaws.com/download.elasticsearch.org/lucenesnapshots/83f9835</url>
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -58,6 +63,13 @@
     </build>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.1.1</version>
+            <type>maven-plugin</type>
+        </dependency>
 
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
