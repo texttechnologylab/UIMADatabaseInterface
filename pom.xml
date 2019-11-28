@@ -6,7 +6,7 @@
 
     <groupId>org.texttechnologylab.annotation</groupId>
     <artifactId>UIMADatabaseInterface</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
 
     <repositories>
         <repository>
