@@ -131,9 +131,10 @@
 
         <dependency>
             <groupId>com.siemens.ct.exi</groupId>
-            <artifactId>exificient</artifactId>
-            <version>1.0.4</version>
+            <artifactId>exificient-for-json</artifactId>
+            <version>1.0.0</version>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.codehaus.plexus/plexus-utils -->
         <dependency>
             <groupId>org.codehaus.plexus</groupId>

@@ -19,15 +19,22 @@ package org.texttechnologylab.uimadb.databases.mongo;
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.Bytes;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.*;
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.GridFSBuckets;
+import com.mongodb.client.gridfs.GridFSDownloadStream;
+import com.mongodb.client.gridfs.GridFSUploadStream;
+import com.mongodb.client.gridfs.model.GridFSUploadOptions;
+import com.mongodb.client.internal.MongoDatabaseImpl;
 import com.mongodb.util.JSON;
 import org.apache.commons.collections.KeyValue;
 import org.apache.uima.UIMAException;
+import org.apache.uima.cas.CASException;
+import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.util.CasIOUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,10 +46,14 @@ import org.texttechnologylab.uimadb.wrapper.mongo.MongoHelper;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
+import org.texttechnologylab.utilities.helper.TempFileHandler;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,6 +73,99 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     public Mongo(String configFile) throws ResourceInitializationException, IOException {
         super(new MongoConfig(configFile));
     }
+
+    public GridFSBucket getBucketConnection(){
+
+        GridFSBucket gridFSBucket = GridFSBuckets.create(this.getConnection().getDB().getMongoClient().getDatabase("rieb"), "TextAnnotator");
+        return gridFSBucket;
+
+    }
+
+    public GridFSUploadOptions getGridFSOptions(){
+
+        GridFSUploadOptions options = new GridFSUploadOptions()
+                .chunkSizeBytes(358400)
+                .metadata(new Document("type", "uima"));
+
+        return options;
+
+    }
+
+    public String createElementGridFS(JCas jcas) throws IOException {
+
+        GridFSUploadOptions options = new GridFSUploadOptions()
+                .chunkSizeBytes(358400)
+                .metadata(new Document("type", "uima"));
+
+        GridFSUploadStream uploadStream = getBucketConnection().openUploadStream(String.valueOf(System.currentTimeMillis()), options);
+
+        File tf = TempFileHandler.getTempFile("aaa", "bbb");
+
+        CasIOUtil.writeXmi(jcas, tf);
+
+        byte[] data = Files.readAllBytes(tf.toPath());
+        uploadStream.write(data);
+        uploadStream.close();
+
+        try {
+            jcas.getView(UIMADatabaseInterface.UIMADBID).setDocumentText(uploadStream.getObjectId().toString());
+        } catch (CASException e) {
+            e.printStackTrace();
+        }
+
+        return uploadStream.getObjectId().toString();
+
+    }
+
+    public JCas getElementGridFS(String sID) throws IOException, UIMAException {
+
+        File tf2 = TempFileHandler.getTempFile("aaa", "bbb");
+        FileOutputStream streamToDownloadTo = new FileOutputStream(tf2);
+        getBucketConnection().downloadToStream(new ObjectId(sID), streamToDownloadTo);
+        streamToDownloadTo.close();
+        System.out.println(streamToDownloadTo.toString());
+
+        JCas rCas = JCasFactory.createJCas();
+        CasIOUtil.readXmi(rCas, tf2);
+
+        return rCas;
+
+    }
+
+    public void deleteElementGridFS(String sMongoID) throws CASException {
+
+        try {
+            getBucketConnection().delete(new ObjectId(sMongoID));
+        }
+        catch (MongoGridFSException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public String updateElementGridFS(String sMongoID, JCas jcas) throws IOException, CASException {
+
+        deleteElementGridFS(sMongoID);
+
+        GridFSUploadOptions options = new GridFSUploadOptions()
+                .chunkSizeBytes(358400)
+                .metadata(new Document("type", "uima"));
+
+        GridFSUploadStream uploadStream = getBucketConnection().openUploadStream(String.valueOf(System.currentTimeMillis()), options);
+
+        File tf = TempFileHandler.getTempFile("aaa", "bbb");
+
+        CasIOUtil.writeXmi(jcas, tf);
+
+        byte[] data = Files.readAllBytes(tf.toPath());
+        uploadStream.write(data);
+        uploadStream.close();
+
+        return uploadStream.getObjectId().toString();
+
+    }
+
+
 
     @Override
     public String createElement(JCas jCas) throws UIMAException, JSONException {
@@ -149,7 +253,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
         String sString = null;
         try {
-            sString = UIMADatabaseInterface.serializeJCas(pJCas);
+            sString = UIMADatabaseInterface.serializeJCas(pJCas, pCompression);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -243,6 +347,31 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
         return rCas;
     }
+
+//    public JCas getElementGridFS(String sID){
+//
+//        JCas rCas = null;
+//
+//        GridFSDownloadStream downloadStream = getBucketConnection().openDownloadStream(new ObjectId(sID));
+//        int fileLength = (int) downloadStream.getGridFSFile().getLength();
+//        byte[] bytesToWriteTo = new byte[fileLength];
+//        downloadStream.read(bytesToWriteTo);
+//        downloadStream.close();
+//
+//        String s = new String(bytesToWriteTo, StandardCharsets.UTF_8);
+//        String json = JSON.serialize(s);
+//        json = json.substring(1, json.length()-1);
+//
+//        try {
+//            rCas = UIMADatabaseInterface.deserializeJCas(json);
+//        } catch (UIMAException e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//        return rCas;
+//
+//    }
 
     private DBObject getDBElement(String sID){
 

@@ -23,12 +23,12 @@ import java.util.Set;
 public abstract class MongoHelper {
 
     private DBCollection coll;
-
+    private MongoConnection conn;
 
     public MongoHelper(MongoConfig mongoConfig) throws ResourceInitializationException {
 
         try {
-            MongoConnection conn = new MongoConnection(mongoConfig);
+            conn = new MongoConnection(mongoConfig);
             coll = conn.coll;
         } catch (IOException e) {
             throw new ResourceInitializationException(e);
