@@ -26,6 +26,7 @@ import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.SofaFS;
 import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.fit.testing.util.DisableLogging;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
@@ -129,6 +130,7 @@ public class UIMADatabaseInterface {
             if(rCas==null){
                 try {
                     rCas = JCasFactory.createJCas();
+
                 } catch (UIMAException e) {
                     e.printStackTrace();
                 }
@@ -138,6 +140,7 @@ public class UIMADatabaseInterface {
             startJCasQueueThread();
 
             try {
+
                 rCas = JCasFactory.createJCas();
             } catch (Exception e) {
                 if(!(e instanceof NullPointerException)){
