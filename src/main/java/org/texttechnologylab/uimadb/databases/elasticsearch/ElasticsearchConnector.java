@@ -20,24 +20,16 @@ package org.texttechnologylab.uimadb.databases.elasticsearch;
  */
 
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.uima.UIMAException;
-import org.apache.uima.cas.CAS;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.util.CasIOUtils;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateAction;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
@@ -45,28 +37,26 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.seqno.RetentionLeaseActions;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
+import java.util.*;
 
-import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 public class ElasticsearchConnector {
 
     File pConfigFile=null;
     Properties pProperties = null;
     RestHighLevelClient client = null;
-
 
     public ElasticsearchConnector(File pConfigFile) throws IOException {
         this.pConfigFile=pConfigFile;
@@ -120,7 +110,16 @@ public class ElasticsearchConnector {
 
         this.client = new RestHighLevelClient(
                 RestClient.builder(
-                        new HttpHost(getProperty("cluster.host"), Integer.parseInt(getProperty("cluster.port")), "http")));
+                        new HttpHost(getProperty("cluster.host"), Integer.parseInt(getProperty("cluster.port")), "http")).setRequestConfigCallback(
+                        new RestClientBuilder.RequestConfigCallback() {
+                            @Override
+                            public RequestConfig.Builder customizeRequestConfig(
+                                    RequestConfig.Builder requestConfigBuilder) {
+                                return requestConfigBuilder
+                                        .setConnectTimeout(5000)
+                                        .setSocketTimeout(60000);
+                            }
+                        }));
 
     }
 
@@ -252,19 +251,30 @@ public class ElasticsearchConnector {
         return getResponse.getSourceAsString();
     }
 
-    public String query(String query) throws IOException {
+    /*
+    Example call one value       : query("language","de")
+    Example call multi value (OR): query("language","de,en")
+     */
+    public ArrayList<String> query(String field, String fValue) throws IOException {
+
+        ArrayList<String> docs = new ArrayList<>();
 
         SearchRequest searchRequest = new SearchRequest();
-        QueryBuilder qb = queryStringQuery(query);
+        MatchQueryBuilder qb = matchQuery("meta." + field, fValue);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(qb);
 
         searchRequest.source(searchSourceBuilder);
-
         SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
 
-        return query;
+        SearchHits results = response.getHits();
+
+        for (SearchHit hit : results) {
+            docs.add(hit.getSourceAsString());
+        }
+
+        return docs;
     }
 
     public void delete(String sID) throws IOException {

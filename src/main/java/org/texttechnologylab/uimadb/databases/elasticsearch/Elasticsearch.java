@@ -26,6 +26,7 @@ import org.apache.uima.jcas.JCas;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
 import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
@@ -34,6 +35,8 @@ import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.Unknow
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -222,7 +225,22 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public Set<JCas> getElementsDirect(String sQuery, String queryValue) {
-        return null;
+        Set<JCas> rCas = new HashSet<>(0);
+
+        try {
+            ArrayList<String> dCas = connector.query(sQuery, queryValue);
+            dCas.forEach(json -> {
+                try {
+                    JCas rCasObject = UIMADatabaseInterface.deserializeJCas(json);
+                    rCas.add(rCasObject);
+                } catch (UIMAException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return rCas;
     }
 
     @Override
@@ -250,6 +268,9 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
         return null;
     }
 
+    public Set<JCas> getElementByFieldValue(String field, String value) {
+        return null;
+    }
     @Override
     public void deleteElements(String sID) {
         try {
