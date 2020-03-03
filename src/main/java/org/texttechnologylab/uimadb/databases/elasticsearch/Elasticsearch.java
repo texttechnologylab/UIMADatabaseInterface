@@ -52,17 +52,17 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     public Elasticsearch(File pConfigFile) throws IOException {
         connector = new ElasticsearchConnector(pConfigFile);
-        init();
+//        init();
     }
 
-    /**
-     *  Internal initialization to generate the indexes and to determine the primitive and complex data types based on the embedded type system descriptors.
-     */
-    public void init() throws IOException {
-
-        connector.init();
-
-    }
+//    /**
+//     *  Internal initialization to generate the indexes and to determine the primitive and complex data types based on the embedded type system descriptors.
+//     */
+//    public void init() throws IOException {
+//
+//        connector.init();
+//
+//    }
 
 
     private String getType(JCas jCas){
@@ -85,10 +85,7 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
         String result = null;
         try {
             String sID = UIMADatabaseInterface.getID(jCas);
-            System.out.println("ID: "+sID);
             long size = sString.getBytes().length / MEGABYTE;
-
-            System.out.println("Size: "+size);
 
             result = connector.update(new JSONObject(sString), sID);
 /*
@@ -126,6 +123,7 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
             result = connector.insert(newObject);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println(":  line 129");
         }
 
         String oID = result;
@@ -183,6 +181,7 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public JCas getElement(String sID) throws IOException {
+
         JCas rCas = null;
 
         String newsID=sID;
@@ -190,6 +189,8 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
         if(newsID.contains("/")){
             newsID = sID.substring(sID.lastIndexOf("/")+1);
         }
+
+        System.out.println(newsID);
 
         String json = connector.get(newsID);
 
@@ -251,7 +252,11 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public void deleteElements(String sID) {
-
+        try {
+            connector.delete(sID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
