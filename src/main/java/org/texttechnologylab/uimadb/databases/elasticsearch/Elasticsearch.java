@@ -26,7 +26,6 @@ import org.apache.uima.jcas.JCas;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
 import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
@@ -35,8 +34,6 @@ import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.Unknow
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -55,17 +52,17 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     public Elasticsearch(File pConfigFile) throws IOException {
         connector = new ElasticsearchConnector(pConfigFile);
-//        init();
+        init();
     }
 
-//    /**
-//     *  Internal initialization to generate the indexes and to determine the primitive and complex data types based on the embedded type system descriptors.
-//     */
-//    public void init() throws IOException {
-//
-//        connector.init();
-//
-//    }
+    /**
+     *  Internal initialization to generate the indexes and to determine the primitive and complex data types based on the embedded type system descriptors.
+     */
+    public void init() throws IOException {
+
+        connector.init();
+
+    }
 
 
     private String getType(JCas jCas){
@@ -88,7 +85,10 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
         String result = null;
         try {
             String sID = UIMADatabaseInterface.getID(jCas);
+            System.out.println("ID: "+sID);
             long size = sString.getBytes().length / MEGABYTE;
+
+            System.out.println("Size: "+size);
 
             result = connector.update(new JSONObject(sString), sID);
 /*
@@ -126,7 +126,6 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
             result = connector.insert(newObject);
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(":  line 129");
         }
 
         String oID = result;
@@ -184,7 +183,6 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public JCas getElement(String sID) throws IOException {
-
         JCas rCas = null;
 
         String newsID=sID;
@@ -192,8 +190,6 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
         if(newsID.contains("/")){
             newsID = sID.substring(sID.lastIndexOf("/")+1);
         }
-
-        System.out.println(newsID);
 
         String json = connector.get(newsID);
 
@@ -225,22 +221,7 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
 
     @Override
     public Set<JCas> getElementsDirect(String sQuery, String queryValue) {
-        Set<JCas> rCas = new HashSet<>(0);
-
-        try {
-            ArrayList<String> dCas = connector.query(sQuery, queryValue);
-            dCas.forEach(json -> {
-                try {
-                    JCas rCasObject = UIMADatabaseInterface.deserializeJCas(json);
-                    rCas.add(rCasObject);
-                } catch (UIMAException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return rCas;
+        return null;
     }
 
     @Override
@@ -268,16 +249,9 @@ public class Elasticsearch implements UIMADatabaseInterfaceService {
         return null;
     }
 
-    public Set<JCas> getElementByFieldValue(String field, String value) {
-        return null;
-    }
     @Override
     public void deleteElements(String sID) {
-        try {
-            connector.delete(sID);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     @Override

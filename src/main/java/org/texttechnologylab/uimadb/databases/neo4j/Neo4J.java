@@ -83,7 +83,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
                 t.getFeatures().forEach(f->{
 
                     if(f.getRange().isPrimitive()){
-                        this.connector.createIndex(pLabel, f.getShortName());
+                        connector.createIndex(pLabel, f.getShortName());
                         properties.put(f.getShortName(), f.getName());
                     }
                     if(f.getRange().isArray() && !f.getRange().isPrimitive()){
@@ -94,7 +94,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
                 });
 
                 if(!t.toString().endsWith("[]") && !t.toString().contains("uima.cas.")) {
-                    this.connector.createIndex(pLabel, "type");
+                    connector.createIndex(pLabel, "type");
                 }
 
             });
@@ -126,21 +126,21 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
     @Override
     public JCas createDummy(JCas pCas) throws UIMAException, JSONException {
-        NodeTemplate nt = NodeTemplate_Impl.create(this.connector);
+        NodeTemplate nt = NodeTemplate_Impl.create(connector);
             pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(nt.getID());
         return pCas;
     }
 
     @Override
     public String createDummy() throws UIMAException, JSONException {
-        NodeTemplate nt = NodeTemplate_Impl.create(this.connector);
+        NodeTemplate nt = NodeTemplate_Impl.create(connector);
         return String.valueOf(nt.getID());
     }
 
     @Override
     public String createElement(JCas jCas, JSONArray pAttributes) throws UIMAException, JSONException {
         String sString = UIMADatabaseInterface.serializeJCas(jCas, pAttributes);
-        NodeTemplate t = NodeTemplate_Impl.create(getType(jCas), this.connector);
+        NodeTemplate t = NodeTemplate_Impl.create(getType(jCas), connector);
         t.update(sString);
 
         return String.valueOf(t.getID());
@@ -160,7 +160,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
         try {
             String sString = UIMADatabaseInterface.serializeJCas(pJCas, pAttributes);
-            NodeTemplate t = NodeTemplate_Impl.getNode(id, this.connector);
+            NodeTemplate t = NodeTemplate_Impl.getNode(id, connector);
             t.update(sString);
 
         } catch (UnknownFactoryException e) {
@@ -178,7 +178,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
     public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String id = UIMADatabaseInterface.getID(pJCas);
 
-        NodeTemplate t = NodeTemplate_Impl.getNode(id, this.connector);
+        NodeTemplate t = NodeTemplate_Impl.getNode(id, connector);
         t.update(pJCas);
 
     }
@@ -186,7 +186,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
     @Override
     public JCas getElement(String sID) {
 
-        NodeTemplate t = NodeTemplate_Impl.getNode(sID, this.connector);
+        NodeTemplate t = NodeTemplate_Impl.getNode(sID, connector);
         try {
             return t.getJCas();
         } catch (UIMAException e) {
@@ -206,19 +206,19 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
         Set<JCas> rCasSet = new HashSet<>(0);
         try {
-        JSONObject queryObject = new JSONObject(sQuery);;
+        JSONObject queryObject = new JSONObject(sQuery);
 
 
-        Map<String, Object> queryMap = new HashMap<String, Object>();
+            Map<String, Object> queryMap = new HashMap<String, Object>();
 
         queryObject.keys().forEachRemaining(key->{
 
-            String[] sString = ((String)key).split("\\.");
+            String[] sString = key.split("\\.");
 
             if(sString.length==2){
                 if(sString[0].equalsIgnoreCase("meta")){
                     try {
-                        queryMap.put(sString[1], queryObject.get((String)key));
+                        queryMap.put(sString[1], queryObject.get(key));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -284,7 +284,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 //                System.out.println(cypherQuery);
 
                 try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
-                    Result r = this.connector.executeQuery(cypherQuery);
+                    Result r = connector.executeQuery(cypherQuery);
 
                     pNodeSet = new HashSet<>(0);
                     while(r.hasNext()){
@@ -304,15 +304,15 @@ public class Neo4J implements UIMADatabaseInterfaceService {
                 if (filterMap.size() == 1) {
                     for (String s : filterMap.keySet()) {
                         if (pNodeSet == null && properties.containsKey(s)) {
-                            pNodeSet = this.connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
+                            pNodeSet = connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
                             filterMap.remove(s);
                         } else {
-                            pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
+                            pNodeSet = connector.getNodes(Neo4J.getLabel(type));
                         }
                     }
 
                 } else if (filterMap.size() == 0 && type.length() > 0) {
-                    pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
+                    pNodeSet = connector.getNodes(Neo4J.getLabel(type));
 
                 }
 
@@ -320,10 +320,10 @@ public class Neo4J implements UIMADatabaseInterfaceService {
                     if (pNodeSet == null) {
                         if (!s.equals("type")) {
                             if (properties.containsKey(s)) {
-                                pNodeSet = this.connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
+                                pNodeSet = connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
                                 filterMap.remove(s);
                             } else {
-                                pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
+                                pNodeSet = connector.getNodes(Neo4J.getLabel(type));
                             }
                         }
                     }
@@ -385,7 +385,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
         if(pNodeSet!=null){
             pNodeSet.stream().forEach(n -> {
 
-                NodeTemplate_Impl nt = new NodeTemplate_Impl(n, this.connector);
+                NodeTemplate_Impl nt = new NodeTemplate_Impl(n, connector);
 
                 try {
                     rCasSet.add(nt.getJCas());
@@ -415,7 +415,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
         Set<Node> pNodeSet = new HashSet<>(0);
 
         try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
-            Result r = this.connector.executeQuery(sQuery);
+            Result r = connector.executeQuery(sQuery);
 
             while(r.hasNext()){
                 try {
@@ -434,7 +434,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
             pNodeSet.stream().forEach(n -> {
 
-                NodeTemplate_Impl nt = new NodeTemplate_Impl(n, this.connector);
+                NodeTemplate_Impl nt = new NodeTemplate_Impl(n, connector);
 
                 try {
                     rCasSet.add(nt.getJCas());
@@ -455,7 +455,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
         Set<Object> rSet = new HashSet<>(0);
 
         try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
-            Result r = this.connector.executeQuery(sQuery);
+            Result r = connector.executeQuery(sQuery);
 
             while(r.hasNext()){
                 try {
@@ -494,13 +494,13 @@ public class Neo4J implements UIMADatabaseInterfaceService {
     @Override
     public Set<JCas> getElementsByGeoLocation(double lat, double lon, double distance) {
 
-        Set<Node> nSet = this.connector.getNodesFromSpatialLayer(new Coordinate(lon, lat), distance);
+        Set<Node> nSet = connector.getNodesFromSpatialLayer(new Coordinate(lon, lat), distance);
 
         Set<JCas> jSet = new HashSet<>(0);
 
         nSet.forEach(n->{
             try {
-                jSet.add(new NodeTemplate_Impl(n, this.connector).getJCas());
+                jSet.add(new NodeTemplate_Impl(n, connector).getJCas());
             } catch (UIMAException e) {
                 e.printStackTrace();
             }
@@ -512,23 +512,19 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
     @Override
     public Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance) {
-        Set<Node> nSet = this.connector.getNodesFromSpatialLayer(new Coordinate(lon, lat), distance);
+        Set<Node> nSet = connector.getNodesFromSpatialLayer(new Coordinate(lon, lat), distance);
 
         Set<JCas> jSet = new HashSet<>(0);
         try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
 
             nSet.stream().filter(f -> {
                 if (sType.length() > 0) {
-                    if (((String) f.getProperty("type", "")).equalsIgnoreCase(sType)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return ((String) f.getProperty("type", "")).equalsIgnoreCase(sType);
                 }
                 return true;
             }).forEach(n -> {
                 try {
-                    jSet.add(new NodeTemplate_Impl(n, this.connector).getJCas());
+                    jSet.add(new NodeTemplate_Impl(n, connector).getJCas());
                 } catch (UIMAException e) {
                     e.printStackTrace();
                 }
@@ -565,7 +561,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
     @Override
     public void destroy() {
-        ((Neo4JConnector)connector).gdbs.shutdown();
+        Neo4JConnector.gdbs.shutdown();
     }
 
     @Override

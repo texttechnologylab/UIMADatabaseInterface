@@ -348,43 +348,6 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         return rCas;
     }
 
-    public JCas getElement(String sID, String sSearch, String sReplace) {
-        JCas rCas = null;
-
-            DBObject tObject = null;
-            String sFinalID = "";
-            if(sID.contains("/")){
-                sFinalID = sID.substring(sID.lastIndexOf("/")+1);
-                tObject = getDBElement(sFinalID);
-            }
-            else {
-                sFinalID = sID;
-                tObject = getDBElement(sFinalID);
-            }
-
-            String json = JSON.serialize(tObject);
-            json = json.replaceAll(sSearch, sReplace);
-
-            try {
-                rCas = UIMADatabaseInterface.deserializeJCas(json);
-
-                try{
-                    rCas.getView(UIMADatabaseInterface.UIMADBID);
-                }
-                catch (Exception e){
-                    rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
-                }
-
-            } catch (UIMAException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-        return rCas;
-    }
-
 //    public JCas getElementGridFS(String sID){
 //
 //        JCas rCas = null;

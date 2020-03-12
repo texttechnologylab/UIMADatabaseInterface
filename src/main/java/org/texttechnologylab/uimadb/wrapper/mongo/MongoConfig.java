@@ -2,6 +2,7 @@ package org.texttechnologylab.uimadb.wrapper.mongo;
 
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
@@ -12,7 +13,7 @@ public class MongoConfig extends Properties {
     public MongoConfig(String pathFile) throws IOException {
         //System.out.println(System.getProperty("user.dir"));
         String current = new File( "." ).getCanonicalPath();
-        BufferedReader lReader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(pathFile)), "UTF-8"));
+        BufferedReader lReader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(pathFile)), StandardCharsets.UTF_8));
         this.load(lReader);
         lReader.close();
     }

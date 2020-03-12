@@ -26,7 +26,6 @@ import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.SofaFS;
 import org.apache.uima.fit.factory.JCasFactory;
-import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.fit.testing.util.DisableLogging;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
@@ -130,7 +129,6 @@ public class UIMADatabaseInterface {
             if(rCas==null){
                 try {
                     rCas = JCasFactory.createJCas();
-
                 } catch (UIMAException e) {
                     e.printStackTrace();
                 }
@@ -140,7 +138,6 @@ public class UIMADatabaseInterface {
             startJCasQueueThread();
 
             try {
-
                 rCas = JCasFactory.createJCas();
             } catch (Exception e) {
                 if(!(e instanceof NullPointerException)){
@@ -373,8 +370,8 @@ public class UIMADatabaseInterface {
             internal.keys().forEachRemaining(k->{
                 JSONObject tObject = null;
                 try {
-                    tObject = internal.getJSONObject((String)k);
-                    rObject.put((String)k, tObject);
+                    tObject = internal.getJSONObject(k);
+                    rObject.put(k, tObject);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -452,7 +449,7 @@ public class UIMADatabaseInterface {
                                     }
                                     else if(pArray.get(a) instanceof TOP){
                                         try {
-                                            sID = UIMADatabaseInterface.getID(((TOP)pArray.get(a)).getCAS().getJCas());
+                                            sID = UIMADatabaseInterface.getID(pArray.get(a).getCAS().getJCas());
                                         } catch (CASException e) {
                                             e.printStackTrace();
                                         }

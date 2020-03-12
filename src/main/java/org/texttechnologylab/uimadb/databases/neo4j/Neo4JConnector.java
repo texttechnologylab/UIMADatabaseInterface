@@ -57,7 +57,7 @@ public class Neo4JConnector implements TransactionEventHandler<Object>, KernelEv
     }
 
     public Neo4JConnector(File confFile){
-        this.pConfFile = confFile;
+        pConfFile = confFile;
         start();
     }
 
@@ -105,7 +105,7 @@ public class Neo4JConnector implements TransactionEventHandler<Object>, KernelEv
     public Node getNode(String sNode){
 
         if(sNode.contains("/")){
-            sNode = sNode.substring(sNode.lastIndexOf("/")+1, sNode.length());
+            sNode = sNode.substring(sNode.lastIndexOf("/")+1);
         }
         if(sNode.startsWith("n") || sNode.startsWith("_")){
             sNode = sNode.replace("n", "");

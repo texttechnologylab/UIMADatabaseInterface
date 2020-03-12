@@ -20,37 +20,32 @@ package org.texttechnologylab.uimadb.databases.elasticsearch;
  */
 
 import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.uima.UIMAException;
-import org.apache.uima.jcas.JCas;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.*;
+import org.elasticsearch.action.update.UpdateAction;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateRequestBuilder;
+import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.index.seqno.RetentionLeaseActions;
 import org.json.JSONObject;
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import java.util.Properties;
 
 public class ElasticsearchConnector {
 
@@ -58,24 +53,27 @@ public class ElasticsearchConnector {
     Properties pProperties = null;
     RestHighLevelClient client = null;
 
+
     public ElasticsearchConnector(File pConfigFile) throws IOException {
         this.pConfigFile=pConfigFile;
         init();
     }
 
-//    public ElasticsearchConnector(File pConfigFile, String sIndexName) throws IOException {
-//        this.pConfigFile=pConfigFile;
-//        pProperties.setProperty("cluster.index", sIndexName);
-//    }
+    public ElasticsearchConnector(File pConfigFile, String sIndexName) throws IOException {
+        this.pConfigFile=pConfigFile;
+        init();
+        pProperties.setProperty("cluster.index", sIndexName);
+    }
 
     private JSONObject setProperties(JSONObject pObject) throws IOException {
 
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
         {
+
             pObject.keySet().forEach(k->{
                 try {
-                    builder.field(k, pObject.get(k).toString());
+                    builder.field(k, pObject.get(k));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -84,6 +82,12 @@ public class ElasticsearchConnector {
         }
         builder.endObject();
 
+        if(pObject.has("settings")){
+            //pObject = pObject.getJSONObject("settings").put("index.mapping.ignore_malformed", true);
+        }
+        else{
+            //pObject = pObject.put("settings", new JSONObject().put("index.mapping.ignore_malformed", true));
+        }
         return pObject;
 
     }
@@ -97,7 +101,7 @@ public class ElasticsearchConnector {
         pProperties = new Properties();
         try {
             UIMADatabaseInterface.getLogger().debug("Elasticsearch: Get Properties from "+pConfigFile.getName());
-            System.out.println("init():  Elasticsearch: Get Propertoties from "+pConfigFile.getName());
+            System.out.println("Elasticsearch: Get Properties from "+pConfigFile.getName());
             pProperties.load(new FileInputStream(pConfigFile));
 
         } catch (IOException e) {
@@ -110,47 +114,16 @@ public class ElasticsearchConnector {
 
         this.client = new RestHighLevelClient(
                 RestClient.builder(
-                        new HttpHost(getProperty("cluster.host"), Integer.parseInt(getProperty("cluster.port")), "http")).setRequestConfigCallback(
-                        new RestClientBuilder.RequestConfigCallback() {
-                            @Override
-                            public RequestConfig.Builder customizeRequestConfig(
-                                    RequestConfig.Builder requestConfigBuilder) {
-                                return requestConfigBuilder
-                                        .setConnectTimeout(5000)
-                                        .setSocketTimeout(60000);
-                            }
-                        }));
+                        new HttpHost(getProperty("cluster.host"), Integer.parseInt(getProperty("cluster.port")), "http")));
 
+        //String sIndex = createIndex(getProperty("cluster.index"), setProperties(new JSONObject()).toString());
+
+        //System.out.println(sIndex);
     }
 
 
     private String createIndex(String sIndex, String sDefaults) throws IOException {
-
         CreateIndexRequest request = new CreateIndexRequest(sIndex);
-
-        request.source(
-                "{\n" +
-                        "  \"mappings\": {\n" +
-                        "    \"date_detection\": false,\n" +
-                        "    \"numeric_detection\": false,\n" +
-                        "   \"dynamic_templates\" : \n[" +
-                        "{" +
-                        "   \"integers\" : {\n" +
-                        "   \"match_mapping_type\": \"double\",\n" +
-                        "	    \"mapping\": {\n" +
-                        "       \"type\": \"text\" }}\n" +
-                        "  }, \n" +
-                        "{" +
-                        "   \"floats\" : {\n" +
-                        "   \"match_mapping_type\": \"long\",\n" +
-                        "	    \"mapping\": {\n" +
-                        "       \"type\": \"text\" }}}]\n" +
-                        "  }, \n" +
-                        "  \"settings\": {\n" +
-                        "    \"index.mapping.total_fields.limit\": 100000\n" +
-                        "  }\n" +
-                        "}"
-                , XContentType.JSON);
 
         Settings.Builder b = Settings.builder();
 
@@ -167,10 +140,11 @@ public class ElasticsearchConnector {
                 return createIndexResponse.index();
             }
             catch (Exception e){
-                System.out.println("Index already exists");
+                System.out.println(e.getMessage());
             }
 
             return "";
+
     }
 
     public String insert(JSONObject pObject) throws IOException {
@@ -180,23 +154,11 @@ public class ElasticsearchConnector {
 
     private String insert(String sJSON) throws IOException {
 
-        try {
-            JCas json = UIMADatabaseInterface.deserializeJCas(sJSON);
-            String indexID = UIMADatabaseInterface.getID(json);
+        IndexRequest request = new IndexRequest(getProperty("cluster.index"));
 
-            createIndex(indexID, setProperties(new JSONObject()).toString());
+        request.source(sJSON, XContentType.JSON);
 
-            IndexRequest request = new IndexRequest();
-            request.index(indexID);
-            request.id(indexID);
-            request.source(sJSON, XContentType.JSON);
-
-            return indexID;
-        } catch (UIMAException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return request.id();
     }
 
     private String updateBulkSingle(String sJSON, String sID) throws IOException {
@@ -221,68 +183,23 @@ public class ElasticsearchConnector {
     }
 
     private String update(String sJSON, String sID) throws IOException {
-
-        try {
-            DeleteIndexRequest deleteRequest = new DeleteIndexRequest(sID);
-            client.indices().delete(deleteRequest, RequestOptions.DEFAULT);
-        } catch (Exception e) {
-            System.out.println("New document");
-        }
-
-        createIndex(sID, setProperties(new JSONObject()).toString());
-
-        IndexRequest request = new IndexRequest();
-        request.index(sID);
-        request.id(sID);
-        request.source(sJSON, XContentType.JSON);
-
-        IndexResponse response = client.index(request, RequestOptions.DEFAULT);
-
-        return response.getIndex();
+//        UpdateResponse response = client.prepareUpdate(getProperty("cluster.index"), "_doc", sID)
+//                .setDoc(sJSON, XContentType.JSON).get();
+//
+//        return response.getId();
+        return "";
     }
 
 
     public String get(String sID) throws IOException {
 
-        GetRequest getRequest = new GetRequest(sID, sID);
+        GetRequest getRequest = new GetRequest(
+                "_doc",
+                sID);
 
-        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-
-        return getResponse.getSourceAsString();
+        return getRequest.fetchSourceContext().toString();
     }
 
-    /*
-    Example call one value       : query("language","de")
-    Example call multi value (OR): query("language","de,en")
-     */
-    public ArrayList<String> query(String field, String fValue) throws IOException {
-
-        ArrayList<String> docs = new ArrayList<>();
-
-        SearchRequest searchRequest = new SearchRequest();
-        MatchQueryBuilder qb = matchQuery("meta." + field, fValue);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(qb);
-
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        SearchHits results = response.getHits();
-
-        for (SearchHit hit : results) {
-            docs.add(hit.getSourceAsString());
-        }
-
-        return docs;
-    }
-
-    public void delete(String sID) throws IOException {
-
-        DeleteIndexRequest deleteRequest = new DeleteIndexRequest(sID);
-        client.indices().delete(deleteRequest, RequestOptions.DEFAULT);
-
-    }
     // on shutdown
     public void onClose() throws IOException {
         this.client.close();

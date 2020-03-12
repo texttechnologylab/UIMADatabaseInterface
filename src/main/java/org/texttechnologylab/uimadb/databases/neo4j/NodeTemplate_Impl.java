@@ -64,7 +64,7 @@ public class NodeTemplate_Impl implements NodeTemplate {
 
         NodeTemplate rNode = null;
         if(sNode.contains("/")){
-            sNode = sNode.substring(sNode.lastIndexOf("/")+1, sNode.length());
+            sNode = sNode.substring(sNode.lastIndexOf("/")+1);
         }
         if(sNode.startsWith("n") || sNode.startsWith("_")){
             sNode = sNode.replace("n", "");
@@ -139,35 +139,35 @@ public class NodeTemplate_Impl implements NodeTemplate {
 
                     Object jObject = null;
                     try {
-                        jObject = internalObject.get((String)key);
+                        jObject = internalObject.get(key);
 
 
                     if (jObject instanceof JSONArray) {
 
-                        JSONArray idArray = internalObject.getJSONArray((String)key);
+                        JSONArray idArray = internalObject.getJSONArray(key);
 
                         for(int a=0; a<idArray.length(); a++){
                             String lid = idArray.getString(a);
 
                             NodeTemplate tNode = new NodeTemplate_Impl(pConnector.getNode(lid), pConnector);
                             if(tNode!=null) {
-                                addRelationship((String) key, tNode);
+                                addRelationship(key, tNode);
                             }
                         }
 
                     } else {
                         if(key.equals("type")){
-                            setProperty((String)key, internalObject.get((String)key));
-                            this.pNode.addLabel(Neo4J.getLabel(internalObject.getString((String)key)));
+                            setProperty(key, internalObject.get(key));
+                            this.pNode.addLabel(Neo4J.getLabel(internalObject.getString(key)));
                         }
 
                         if(Neo4J.properties.containsKey(key)){
-                            setProperty((String)key, internalObject.get((String)key));
+                            setProperty(key, internalObject.get(key));
                         }
                         else if(Neo4J.relations.containsKey(key)){
-                            String lid = internalObject.getString((String)key);
+                            String lid = internalObject.getString(key);
                             NodeTemplate tNode = new NodeTemplate_Impl(pConnector.getNode(lid), pConnector);
-                            addRelationship((String)key, tNode);
+                            addRelationship(key, tNode);
                         }
 
 

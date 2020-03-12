@@ -21,6 +21,7 @@ package org.texttechnologylab.uimadb;
 
 import org.apache.commons.collections.KeyValue;
 import org.apache.uima.UIMAException;
+import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -97,7 +98,7 @@ public interface UIMADatabaseInterfaceService {
      * @throws SerializerInitializationException
      * @throws UnknownFactoryException
      */
-    void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, IOException;
+    void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, IOException, CASException;
 
     /**
      * Return a JCas based on its database ID.
@@ -121,7 +122,7 @@ public interface UIMADatabaseInterfaceService {
      * @param sQuery
      * @return
      */
-    Set<JCas> getElements(String sQuery);
+    Set<JCas> getElements(String sQuery) throws UIMAException, IOException;
 
     /**
      * Select JCas elements based on a special query.
@@ -129,7 +130,7 @@ public interface UIMADatabaseInterfaceService {
      * @param sQuery
      * @return
      */
-    Set<JCas> getElementsDirect(String sQuery);
+    Set<JCas> getElementsDirect(String sQuery) throws UIMAException, IOException;
 
     /**
      * Select JCas elements based on a special query.
@@ -137,7 +138,7 @@ public interface UIMADatabaseInterfaceService {
      * @param sQuery
      * @return
      */
-    Set<JCas> getElementsDirect(String sQuery, String queryValue);
+    Set<JCas> getElementsDirect(String sQuery, String queryValue) throws UIMAException, IOException;
 
     /**
      * Select elements based on a special query.
@@ -161,7 +162,7 @@ public interface UIMADatabaseInterfaceService {
      * @param kvs
      * @return
      */
-    Set<JCas> getElements(KeyValue... kvs);
+    Set<JCas> getElements(KeyValue... kvs) throws UIMAException, IOException;
 
     /**
      * Select JCas elements by geo-location.
@@ -171,7 +172,7 @@ public interface UIMADatabaseInterfaceService {
      * @param distance
      * @return
      */
-    Set<JCas> getElementsByGeoLocation(double lat, double lon, double distance);
+    Set<JCas> getElementsByGeoLocation(double lat, double lon, double distance) throws UIMAException, IOException;
 
     /**
      * Select JCas elements by geo-location.
@@ -181,7 +182,7 @@ public interface UIMADatabaseInterfaceService {
      * @param distance
      * @return
      */
-    Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance);
+    Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance) throws UIMAException, IOException;
 
     /**
      * Delete Element
