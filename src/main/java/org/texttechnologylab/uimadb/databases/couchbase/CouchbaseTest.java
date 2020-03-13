@@ -1,10 +1,8 @@
 package org.texttechnologylab.uimadb.databases.couchbase;
 
 import org.apache.uima.UIMAException;
-import org.apache.uima.cas.SofaFS;
 import org.apache.uima.jcas.JCas;
 import org.json.JSONException;
-import org.texttechnologylab.uimadb.databases.couchbase.Couchbase;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseConfig;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseQueries;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseStorage;
@@ -13,10 +11,7 @@ import org.texttechnologylab.uimadb.wrapper.couchbase.XmiHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import static org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseStorage.setBufferSize;
 
 public class CouchbaseTest {
 
@@ -24,8 +19,6 @@ public class CouchbaseTest {
     public void testConnection() throws UIMAException, JSONException, IOException {
         uploadXmiData(); // upload XmiData to Couchbase. Uses chunking.
         downloadXmiData(); // download Data from Couchbase and write to xmi_output
-
-
         CouchbaseQueries.printQueryResultsMeta("SELECT META(`test-meta`).id FROM `test-meta` WHERE `type` = \"org.texttechnologylab.annotation.ocr.OCRParagraph\"");
         //CouchbaseQueries.queryDocByType("org.texttechnologylab.annotation.ocr.OCRParagraph");
     }
@@ -33,21 +26,15 @@ public class CouchbaseTest {
     public void uploadXmiData() throws UIMAException, IOException {
         CouchbaseConfig couchbaseConfig = new CouchbaseConfig("src/main/resources/couchbase_example.conf");
         Couchbase cb = new Couchbase(couchbaseConfig);
-
         // all xmi input files
         File[] files = new File("xmi_input").listFiles();
-
         // used to get meta data from every jcas
         List<JCas> jCasList = new ArrayList<JCas>();
         // upload every file from directory
         for (File file : files) {
-
             // set buffer size (= chunk size in byte) for file
-
             CouchbaseStorage.setBufferSize(Integer.parseInt(couchbaseConfig.getChunkSize())); // get chunksize from config
             JCas myJCas = XmiHandler.XmiFileToJCas(file.getPath());
-
-            System.out.println(myJCas.size());
             JCas myJpCas = cb.createDummy(myJCas);
             cb.updateElementBlob(myJCas);
             jCasList.add(myJCas);
@@ -84,8 +71,6 @@ public class CouchbaseTest {
             // Convert Jcas to Xmi and write to file
             XmiHandler.JCasToXmiFile(rCas, id);
         }
-
         cb.destroy();
-
     }
 }

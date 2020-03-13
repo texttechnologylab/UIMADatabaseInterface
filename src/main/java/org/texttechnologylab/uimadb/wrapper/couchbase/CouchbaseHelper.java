@@ -12,7 +12,6 @@ import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.Serial
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.UUID;
 
 
@@ -31,60 +30,44 @@ public abstract class CouchbaseHelper {
     }
 
     public CouchbaseHelper(CouchbaseConnection couchbaseConnection) throws ResourceInitializationException {
-
         CouchbaseConnection connection = couchbaseConnection;
         bucket = connection.bucket;
     }
 
-
-    public CouchbaseHelper( String sHost, String sBucket, String sUsername, String sPassword) throws ResourceInitializationException {
-        CouchbaseConnection connection = new CouchbaseConnection(sHost,sBucket,sUsername, sPassword);
+    public CouchbaseHelper(String sHost, String sBucket, String sUsername, String sPassword) throws ResourceInitializationException {
+        CouchbaseConnection connection = new CouchbaseConnection(sHost, sBucket, sUsername, sPassword);
         bucket = connection.bucket;
     }
-
 
     public String createElement(JCas jCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
         String jsonString = UIMADatabaseInterface.serializeJCas(jCas);
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
-
         // create random key couchbase does not support randomly generated keys per default
         String id = UUID.randomUUID().toString();
         JsonDocument doc = JsonDocument.create(id, jsonObject);
-
         // fails if document already exists
         bucket.insert(doc);
         return id;
     }
 
-
     public JsonObject dummyObject(String sID) {
         // creates an empty dummy object with given id
-
         JsonObject docSource = JsonObject.empty().put("_id", sID);
         return docSource;
     }
 
-
-    public JsonDocument deleteElementByID(String sID){
-
+    public JsonDocument deleteElementByID(String sID) {
         JsonObject docSource = JsonObject.create();
         docSource.put("_id", sID);
-
         JsonDocument pResult = bucket.remove(sID);
-
         return pResult;
-
     }
 
-
-    public static Bucket getBucket(){
-
+    public static Bucket getBucket() {
         return bucket;
     }
 
-    public CouchbaseConnection getConnection(){
+    public CouchbaseConnection getConnection() {
         return connection;
     }
-
-
 }

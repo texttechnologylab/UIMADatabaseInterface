@@ -33,9 +33,9 @@ import java.util.UUID;
 import static org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseQueries.returnQueryResultsData;
 import static org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseStorage.setBufferSize;
 
-public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceService{
+public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceService {
 
-    public Couchbase(String sHost, String sBucket,  String sUsername, String sPassword) throws ResourceInitializationException {
+    public Couchbase(String sHost, String sBucket, String sUsername, String sPassword) throws ResourceInitializationException {
         super(new CouchbaseConnection(sHost, sBucket, sUsername, sPassword));
     }
 
@@ -46,9 +46,6 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     public Couchbase(String configFile) throws ResourceInitializationException, IOException {
         super(new CouchbaseConfig(configFile));
     }
-
-
-
 
 
     @Override
@@ -63,12 +60,13 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         getBucket().insert(doc);
         return id;
     }
+
     @Override
     public JCas createDummy(JCas pCas) throws UIMAException, JSONException {
         // Create a new database entry based on the JCas. The database ID is added to the JCas.
 
         //write id as sofa in UIMA doc // if else to avoid error if uimadbid already exists
-        if (UIMADatabaseInterface.getID(pCas).isEmpty()){
+        if (UIMADatabaseInterface.getID(pCas).isEmpty()) {
             String id = UUID.randomUUID().toString();
             // create empty object with only id field
             JsonObject jsonObject = dummyObject(id);
@@ -77,8 +75,8 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             // upload doc
             getBucket().insert(doc);
             // add ID to JCas
-            pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(id);}
-        else{
+            pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(id);
+        } else {
             // if there is already an UIMADBID use it instead of randomly generated id
             String id = UIMADatabaseInterface.getID(pCas);
             JsonObject jsonObject = dummyObject(id);
@@ -87,7 +85,6 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         }
         return pCas;
     }
-
 
     // use if data is stored as binary chunks (for data >20MB)
     public void updateElementBlob(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
@@ -98,6 +95,7 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             e.printStackTrace();
         }
     }
+
     public void updateElementBlob(JCas pJCas, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
         // update existing element that stored as Blob, do not use for elements that are stored as JSON-File
 
@@ -111,13 +109,16 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         // write "table of content" file to dummy and blobs to seperate new files
         CouchbaseStorage.writeContent(sID, jsonString);
     }
+
     public void updateElementBlob(JCas pJcas, int chunksize) throws CasSerializationException, SerializerInitializationException, CASException, UnknownFactoryException {
         setBufferSize(chunksize);
         updateElementBlob(pJcas);
     }
+
     public void updateElementBlob(JCas pJCas, String sID) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         updateElementBlob(pJCas, sID, false);
     }
+
     public void updateElementBlob(JCas pJCas, JSONArray pAttributes, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String jsonString = null;
         try {
@@ -125,14 +126,12 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         String sID = UIMADatabaseInterface.getID(pJCas);
-
         // write blob and jsonfile with chunk overview to content bucket
         CouchbaseStorage.writeContent(sID, jsonString);
     }
-    public void updateElementBlob(JCas pJCas, String sID, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
 
+    public void updateElementBlob(JCas pJCas, String sID, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String jsonString = null;
         try {
             jsonString = UIMADatabaseInterface.serializeJCas(pJCas, bCompressed);
@@ -141,7 +140,8 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         }
         CouchbaseStorage.writeContent(sID, jsonString);
     }
-    public void updateMetaData(JCas pJCas){
+
+    public void updateMetaData(JCas pJCas) {
         JSONObject metaInformation = UIMADatabaseInterface.getMetaInformation(pJCas);
         // convert JSONObject to JsonObject which is used in couchbase
         String metaString = metaInformation.toString();
@@ -149,15 +149,12 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         CouchbaseStorage.writeMetaData(sID, metaString);
     }
 
-    public JCas getElementBlob(String sID){
+    public JCas getElementBlob(String sID) {
         // get Element that is stored as a blob from CB. Deserialize it to JCas.
-
         JCas rCas = null;
-
         // get binary data associated with the id
         // convert binary data to string
         String jsonString = CouchbaseStorage.getDocumentString(sID);
-
         try {
             rCas = UIMADatabaseInterface.deserializeJCas(jsonString);
 
@@ -165,22 +162,21 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             e.printStackTrace();
         }
         return rCas;
-
     }
 
-    public void deleteElementsBlob(String sID){
+    public void deleteElementsBlob(String sID) {
         CouchbaseStorage.deleteContent(sID);
     }
 
-    // use if data is stored as single JSON-Doc (for data < 20MB)
     @Override
     public String createElement(JCas jCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
+        //use if data is supposed to be stored as single JSON-Doc (for data < 20MB)
         //Create a new database entry based on the JCas. The ID of the database document is returned
-        // creates Document in a standard way, doesn't work if document is >20MB
+        //doesn't work if document is >20MB
         String jsonString = UIMADatabaseInterface.serializeJCas(jCas);
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
 
-        if (UIMADatabaseInterface.getID(jCas).isEmpty()){
+        if (UIMADatabaseInterface.getID(jCas).isEmpty()) {
             String id = UUID.randomUUID().toString();
             // create json document that contains the dummy object
             JsonDocument doc = JsonDocument.create(id, jsonObject);
@@ -188,9 +184,8 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             getBucket().insert(doc);
             // add ID to JCas
             jCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(id);
-            return id;}
-        else{
-
+            return id;
+        } else {
             String id = UIMADatabaseInterface.getID(jCas);
             JsonDocument doc = JsonDocument.create(id, jsonObject);
             getBucket().upsert(doc);
@@ -201,10 +196,9 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     public String createElement(JCas jCas, JSONArray pAttributes) throws UIMAException, JSONException {
         // Create a new database JCas with specific attributes.
         String jsonString = UIMADatabaseInterface.serializeJCas(jCas, pAttributes);
-
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
 
-        if (UIMADatabaseInterface.getID(jCas).isEmpty()){
+        if (UIMADatabaseInterface.getID(jCas).isEmpty()) {
             String id = UUID.randomUUID().toString();
             // create json document that contains the dummy object
             JsonDocument doc = JsonDocument.create(id, jsonObject);
@@ -212,15 +206,15 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             getBucket().insert(doc);
             // add ID to JCas
             jCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(id);
-            return id;}
-        else{
-
+            return id;
+        } else {
             String id = UIMADatabaseInterface.getID(jCas);
             JsonDocument doc = JsonDocument.create(id, jsonObject);
             getBucket().upsert(doc);
             return id;
         }
     }
+
     @Override
     public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
         // replace existing document with updated version
@@ -230,31 +224,31 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             e.printStackTrace();
         }
     }
+
     public void updateElement(JCas pJCas, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
         // replace existing document with updated version
         // do not use for elements that are stored as a blob, use updadeElementBlob instead.
-
         String jsonString = null;
         try {
             jsonString = UIMADatabaseInterface.serializeJCas(pJCas, bCompressed);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         String sID = UIMADatabaseInterface.getID(pJCas);
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
         JsonDocument jsonDocument = JsonDocument.create(sID, jsonObject);
-
         getBucket().upsert(jsonDocument);
-
     }
+
     public void updateElement(JCas pJCas, String sID) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         updateElement(pJCas, sID, false);
     }
+
     @Override
     public void updateElement(JCas pJCas, JSONArray pAttributes) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         updateElement(pJCas, pAttributes, false);
     }
+
     @Override
     public void updateElement(JCas pJCas, JSONArray pAttributes, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String jsonString = null;
@@ -263,39 +257,31 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         String sID = UIMADatabaseInterface.getID(pJCas);
-
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
         JsonDocument jsonDocument = JsonDocument.create(sID, jsonObject);
-
         getBucket().upsert(jsonDocument);
     }
-    public void updateElement(JCas pJCas, String sID, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
 
+    public void updateElement(JCas pJCas, String sID, boolean bCompressed) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         String jsonString = null;
         try {
             jsonString = UIMADatabaseInterface.serializeJCas(pJCas, bCompressed);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
         JsonDocument jsonDocument = JsonDocument.create(sID, jsonObject);
-
         getBucket().upsert(jsonDocument);
-
     }
+
     @Override
-    public JCas getElement(String sID){
+    public JCas getElement(String sID) {
         // get JSON representation from Couchbase. Get JsonDocument and deserialize it to JCas.
-
         JCas rCas = null;
-
         JsonDocument jsonDocument = getBucket().get(sID);
         JsonObject jsonObject = jsonDocument.content();
         String jsonString = jsonObject.toString();
-
         try {
             rCas = UIMADatabaseInterface.deserializeJCas(jsonString);
 
@@ -309,10 +295,10 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     public void deleteElements(String sID) {
         super.deleteElementByID(sID);
     }
-    @Override
-    public long getSize(String sID){
-        JsonObject tObject = null;
 
+    @Override
+    public long getSize(String sID) {
+        JsonObject tObject = null;
         JsonDocument doc = getBucket().get(sID);
         tObject = doc.content();
         String jsonString = tObject.toString();
@@ -332,10 +318,8 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         } catch (IOException | ResourceInitializationException e) {
             e.printStackTrace();
         }
-
         Set<JCas> rCas = new HashSet<>(0);
-
-        for (N1qlQueryRow row : results){
+        for (N1qlQueryRow row : results) {
             JsonObject jsonObject = row.value();
             String jsonString = jsonObject.toString();
             System.out.println(jsonString);
@@ -368,7 +352,6 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     @Override
     public Set<JCas> getElements(KeyValue... kvs) throws UIMAException, IOException {
         StringBuilder sb = new StringBuilder();
-
         return getElements(sb.toString());
     }
 
@@ -384,28 +367,21 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
         JsonObject geoWithin = JsonObject.empty();
         JsonObject filter = JsonObject.empty();
         JsonObject query = JsonObject.empty();
-
         JsonArray pArray = JsonArray.create();
-
-        pArray.add(new double[] {lon, lat}).add(new BigDecimal(distance/6371.1));
-
+        pArray.add(new double[]{lon, lat}).add(new BigDecimal(distance / 6371.1));
         geoWithin.put("$centerSphere", pArray);
         filter.put("$centerSphere", geoWithin);
         query.put("geo", filter);
-
-        if(sType.length()>0) {
+        if (sType.length() > 0) {
             query.put("meta.type", sType);
         }
         Set<JCas> setCas = getElements(query.toString());
-
         return setCas;
-
     }
-
 
     @Override
     public Object getRealID(String sID) {
-        return sID.replace("_","");
+        return sID.replace("_", "");
     }
 
     @Override
@@ -415,6 +391,5 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
 
     @Override
     public void start() {
-
     }
 }

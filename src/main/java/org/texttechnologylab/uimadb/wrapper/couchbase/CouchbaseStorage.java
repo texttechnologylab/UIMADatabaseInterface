@@ -15,7 +15,6 @@ import java.io.InputStream;
 
 public class CouchbaseStorage {
     // used for storage of documents > 20MB
-
     // size of each binary chunk
     private static int BUFFER_SIZE = 1048576;
     private static final String STORAGE_ID = "local";

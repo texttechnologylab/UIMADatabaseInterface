@@ -7,16 +7,15 @@ import java.util.Properties;
 public class CouchbaseConfig extends Properties {
 
     public CouchbaseConfig(String pathFile) throws IOException {
-        String current = new File( "." ).getCanonicalPath();
+        String current = new File(".").getCanonicalPath();
         BufferedReader lReader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(pathFile)), StandardCharsets.UTF_8));
         this.load(lReader);
         lReader.close();
     }
 
-
     public String getHost() {
-            String sResult = getProperty("couchbase_host", "defaulthost");
-            return sResult;
+        String sResult = getProperty("couchbase_host", "defaulthost");
+        return sResult;
     }
 
     public String getDataBucket() {
@@ -28,6 +27,7 @@ public class CouchbaseConfig extends Properties {
         String sResult = getProperty("couchbase_metabucket", "defaultdbucket");
         return sResult;
     }
+
     public String getUsername() {
         String sResult = getProperty("couchbase_user", "defaultuser");
         return sResult;
@@ -38,7 +38,7 @@ public class CouchbaseConfig extends Properties {
         return sResult;
     }
 
-    public String getChunkSize(){
+    public String getChunkSize() {
         String chunksize = getProperty("chunksize", "1048576");
         return chunksize;
     }

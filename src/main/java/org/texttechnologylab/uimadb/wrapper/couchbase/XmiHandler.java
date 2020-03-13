@@ -16,10 +16,8 @@ import java.io.*;
 public class XmiHandler {
 
     public static JCas XmiFileToJCas(String xmiFilePath) throws IOException, InvalidXMLException, ResourceInitializationException, CollectionException, CASException {
-
         JCas myJCas = UIMADatabaseInterface.getJCas();
         CAS myCas = myJCas.getCas();
-
         File currentFile = new File(xmiFilePath);
         try (InputStream inputStream = new FileInputStream(currentFile)) {
             // Deserialize Xmi to CAS via inputstream
@@ -33,7 +31,6 @@ public class XmiHandler {
 
     public static void JCasToXmiFile(JCas jCas, String FileName) {
         // create XMI file from CAS in directroy xmi_output
-
         String file = "xmi_output/" + FileName;
         File currentFile = new File(file);
         CAS myCas = jCas.getCas();

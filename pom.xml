@@ -35,7 +35,6 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-
     </repositories>
 
     <build>
@@ -49,7 +48,6 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
@@ -60,7 +58,6 @@
                     <rulesUri>file://${basedir}/version-rules.xml</rulesUri>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
@@ -70,8 +67,6 @@
             <artifactId>textimager-uima</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.texttechnologylab.annotation</groupId>
             <artifactId>typesystem</artifactId>
@@ -82,74 +77,58 @@
             <artifactId>maven-modular</artifactId>
             <version>1.1</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
             <version>3.1.1</version>
             <type>maven-plugin</type>
         </dependency>
-
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
             <artifactId>Utilities</artifactId>
             <version>1.0.2-uima-2.10.4</version>
         </dependency>
-
         <dependency>
             <groupId>org.texttechnologylab.annotation</groupId>
             <artifactId>typesystem</artifactId>
             <version>1.7.5</version>
         </dependency>
-
-
-
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.11.2</version>
         </dependency>
-
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>7.4.0</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.couchbase.client/java-client -->
         <dependency>
             <groupId>com.couchbase.client</groupId>
             <artifactId>java-client</artifactId>
             <version>2.7.11</version>
         </dependency>
-
-
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>2.9.8</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20180813</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.apache.uima/uimaj-core -->
-        <!-- evtl zu 2.9. machen -->
         <dependency>
             <groupId>org.apache.uima</groupId>
             <artifactId>uimaj-core</artifactId>
             <version>2.10.3</version>
         </dependency>
-
-
         <!-- https://mvnrepository.com/artifact/org.apache.uima/uimafit-core -->
-        <!-- evtl zu 2.3.0 machen -->
         <dependency>
             <groupId>org.apache.uima</groupId>
             <artifactId>uimafit-core</artifactId>
@@ -166,20 +145,17 @@
             <version>0.24-neo4j-3.1.1</version>
             <type>jar</type>
         </dependency>
-
         <dependency>
             <groupId>com.siemens.ct.exi</groupId>
             <artifactId>exificient-for-json</artifactId>
             <version>1.0.0</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.codehaus.plexus/plexus-utils -->
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
             <version>3.3.0</version>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -191,7 +167,6 @@
             <artifactId>uimaj-core</artifactId>
             <version>2.10.3</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.apache.uima/uimafit-core -->
         <dependency>
             <groupId>org.apache.uima</groupId>
@@ -243,8 +218,6 @@
             <version>1.1.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/xerces/xerces -->
-
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -277,9 +250,5 @@
             <artifactId>chemistry-opencmis-commons-api</artifactId>
             <version>1.0.0</version>
         </dependency>
-
-
     </dependencies>
-
-
 </project>
