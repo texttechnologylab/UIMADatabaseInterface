@@ -22,27 +22,21 @@ public class CouchbaseStorage {
 
     public static void writeContent(String dataId, String jsonString){
         // change jsonString to inputstream oder contentstream to allow for other data formats
-
         byte[] jsonStringByteArray = jsonString.getBytes();
         InputStream inputStream = new ByteArrayInputStream(jsonStringByteArray);
-
         // count the number of parts
         long length = jsonStringByteArray.length;
         System.out.println("length=" + length + " - buffer size=" + BUFFER_SIZE);
-
         long nbparts = length / BUFFER_SIZE;
-
         // add last part for the rest
         if (length - nbparts * BUFFER_SIZE > 0)
             nbparts++;
         System.out.println("nbparts=" + nbparts);
-
         // create "overview" document which is used to find all the chunks of a requested object
         JsonObject doc = JsonObject.empty();
         doc.put("count", nbparts);
         doc.put("mimetype", "JsonString"); // change if other documents than JsonStrings are stored binary
         doc.put("length", length);
-
         long totalLength = 0;
         int read = 0; // The number of bytes not yet read
         byte[] byteArray = new byte[BUFFER_SIZE];
@@ -50,12 +44,9 @@ public class CouchbaseStorage {
         for (int i = 0; i < nbparts; i++) {
             try {
                 // read in chunks of BUFFER_SIZE from inputStream
-
                 read = inputStream.read(byteArray, 0, BUFFER_SIZE);
-
                 System.out.println("wrote " + read + " bytes beginning from "
                         + offset);
-
                 totalLength += read;
                 System.out.println("Number of bytes read : " + totalLength);
                 offset += read;
@@ -73,12 +64,8 @@ public class CouchbaseStorage {
         if (totalLength != length)
             System.out.println("Wrong number of bytes read from stream");
 
-
         JsonDocument jsondoc = JsonDocument.create(dataId, doc);
         CouchbaseHelper.getBucket().upsert(jsondoc);
-
-        // reset buffer size (needed if custom buffer size is used)
-        //setBufferSize(1048576);
     }
 
     public static void writeContent(String dataId, String jsonString, Integer chunkByteSize){
@@ -100,7 +87,6 @@ public class CouchbaseStorage {
         Bucket bucket = CouchbaseHelper.getBucket();
         JsonObject jsonObject = JsonObject.fromJson(jsonString);
         JsonDocument jsonDocument = JsonDocument.create(dataId, jsonObject);
-
         bucket.upsert(jsonDocument);
     }
 
@@ -116,7 +102,7 @@ public class CouchbaseStorage {
         if(nbparts==null || length==null){System.out.println("Document invalid");}
 
         // mimeType only relevant when inserting different types of documents
-        //mimeType.append(json.getString("mimetype"));
+        // mimeType.append(json.getString("mimetype"));
 
         // byteArray that is filled with content of all chunks
         byte[] byteArray = new byte[length];
@@ -127,21 +113,17 @@ public class CouchbaseStorage {
         for (int i = 0; i < nbparts; i++) {
             partLength = json.getInt(dataId + PART_SUFFIX + i);
             if(partLength == null){ System.out.println("length of part "+i+" is mandatory");}
-
             BinaryDocument bDoc =
                     bucket.get(dataId + PART_SUFFIX + i,BinaryDocument.class);
             ByteBuf part = bDoc.content();
             byte[] dst = new byte[partLength];
-
             // put content of current chunk in dst
             part.readBytes(dst);
-
             // put content of dst in list that contains whole document in byte
             for (int k = 0; k < partLength; k++) {
                 byteArray[k + offset] = dst[k];
             }
             offset += partLength;
-
             // clear buffer for next chunk
             part.release();
         }
@@ -150,15 +132,12 @@ public class CouchbaseStorage {
     }
 
     public static boolean deleteContent(String dataId) {
-
         System.out.println("deleteContent dataId="+dataId);
         Bucket bucket =CouchbaseHelper.getBucket();
         JsonDocument doc = bucket.get(dataId);
         JsonObject json = doc.content();
-
         // delete the main doc
         bucket.remove(dataId);
-
         // delete each part
         Integer nbparts = json.getInt("count");
         if(nbparts==null) return true;
