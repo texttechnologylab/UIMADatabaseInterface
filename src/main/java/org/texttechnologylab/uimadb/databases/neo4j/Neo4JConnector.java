@@ -57,7 +57,7 @@ public class Neo4JConnector implements TransactionEventHandler<Object>, KernelEv
     }
 
     public Neo4JConnector(File confFile){
-        pConfFile = confFile;
+        this.pConfFile = confFile;
         start();
     }
 
@@ -105,7 +105,7 @@ public class Neo4JConnector implements TransactionEventHandler<Object>, KernelEv
     public Node getNode(String sNode){
 
         if(sNode.contains("/")){
-            sNode = sNode.substring(sNode.lastIndexOf("/")+1);
+            sNode = sNode.substring(sNode.lastIndexOf("/")+1, sNode.length());
         }
         if(sNode.startsWith("n") || sNode.startsWith("_")){
             sNode = sNode.replace("n", "");
@@ -360,8 +360,8 @@ public class Neo4JConnector implements TransactionEventHandler<Object>, KernelEv
                 creator = creator.on(ptype);
 
                 indexDefinition = creator.create();
-                    UIMADatabaseInterface.getLogger().debug(String.format("Percent complete: %1.0f%%",
-                            schema.getIndexPopulationProgress(indexDefinition).getCompletedPercentage()));
+                UIMADatabaseInterface.getLogger().debug(String.format("Percent complete: %1.0f%%",
+                        schema.getIndexPopulationProgress(indexDefinition).getCompletedPercentage()));
 
             }
 

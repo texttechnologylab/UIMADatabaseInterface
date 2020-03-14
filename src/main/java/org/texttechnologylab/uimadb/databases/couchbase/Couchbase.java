@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
-import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseConfig;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseConnection;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseHelper;

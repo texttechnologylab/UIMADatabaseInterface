@@ -26,6 +26,7 @@ import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.SofaFS;
 import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.fit.testing.util.DisableLogging;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
@@ -129,6 +130,7 @@ public class UIMADatabaseInterface {
             if(rCas==null){
                 try {
                     rCas = JCasFactory.createJCas();
+
                 } catch (UIMAException e) {
                     e.printStackTrace();
                 }
@@ -138,6 +140,7 @@ public class UIMADatabaseInterface {
             startJCasQueueThread();
 
             try {
+
                 rCas = JCasFactory.createJCas();
             } catch (Exception e) {
                 if(!(e instanceof NullPointerException)){
@@ -261,15 +264,15 @@ public class UIMADatabaseInterface {
         T rType = null;
 
 
-            FSIterator<SofaFS> sofaIterator = jCas.getSofaIterator();
+        FSIterator<SofaFS> sofaIterator = jCas.getSofaIterator();
 
-            while(sofaIterator.hasNext()){
-                SofaFS sfs = sofaIterator.next();
-                if(!sfs.getSofaID().contains("_")){
-                    JCas pCas = JCasUtil.getView(jCas, sfs.getSofaID(), false);
-                    rType = JCasUtil.selectSingle(pCas, type);
-                }
+        while(sofaIterator.hasNext()){
+            SofaFS sfs = sofaIterator.next();
+            if(!sfs.getSofaID().contains("_")){
+                JCas pCas = JCasUtil.getView(jCas, sfs.getSofaID(), false);
+                rType = JCasUtil.selectSingle(pCas, type);
             }
+        }
 
         return rType;
     }
@@ -370,8 +373,8 @@ public class UIMADatabaseInterface {
             internal.keys().forEachRemaining(k->{
                 JSONObject tObject = null;
                 try {
-                    tObject = internal.getJSONObject(k);
-                    rObject.put(k, tObject);
+                    tObject = internal.getJSONObject((String)k);
+                    rObject.put((String)k, tObject);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -430,108 +433,108 @@ public class UIMADatabaseInterface {
 
             fList.forEach(f->{
 
-                    Object oValue = null;
-                    if(f.getRange().getName().endsWith("[]")){
-                        oValue = anno.getFeatureValue(f);
-                        if(oValue!=null) {
-                            FSArray pArray = (FSArray) oValue;
-                            JSONArray tArray = new JSONArray();
-                            for (int a = 0; a < pArray.size(); a++) {
-                                if (pArray.get(a).getType().isPrimitive()) {
-                                    tArray.put(pArray.get(a));
-                                } else {
-                                    String sID = "";
-                                    if(pArray.get(a) instanceof AnnotationBase){
-                                        sID = UIMADatabaseInterface.getID(((AnnotationBase)pArray.get(a)));
-                                        if(sID.equals("_InitialView")){
-                                           sID="";
-                                        }
-                                    }
-                                    else if(pArray.get(a) instanceof TOP){
-                                        try {
-                                            sID = UIMADatabaseInterface.getID(pArray.get(a).getCAS().getJCas());
-                                        } catch (CASException e) {
-                                            e.printStackTrace();
-                                        }
-                                        if(sID.equals("_InitialView")){
-                                            sID="";
-                                        }
-                                    }
-                                    if(sID.length()>0) {
-                                        tArray.put(sID);
+                Object oValue = null;
+                if(f.getRange().getName().endsWith("[]")){
+                    oValue = anno.getFeatureValue(f);
+                    if(oValue!=null) {
+                        FSArray pArray = (FSArray) oValue;
+                        JSONArray tArray = new JSONArray();
+                        for (int a = 0; a < pArray.size(); a++) {
+                            if (pArray.get(a).getType().isPrimitive()) {
+                                tArray.put(pArray.get(a));
+                            } else {
+                                String sID = "";
+                                if(pArray.get(a) instanceof AnnotationBase){
+                                    sID = UIMADatabaseInterface.getID(((AnnotationBase)pArray.get(a)));
+                                    if(sID.equals("_InitialView")){
+                                        sID="";
                                     }
                                 }
+                                else if(pArray.get(a) instanceof TOP){
+                                    try {
+                                        sID = UIMADatabaseInterface.getID(((TOP)pArray.get(a)).getCAS().getJCas());
+                                    } catch (CASException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if(sID.equals("_InitialView")){
+                                        sID="";
+                                    }
+                                }
+                                if(sID.length()>0) {
+                                    tArray.put(sID);
+                                }
                             }
-
-                            oValue = tArray;
                         }
+
+                        oValue = tArray;
                     }
-                    else {
-                        try {
-                            switch (f.getRange().getName()) {
-                                case "uima.cas.Integer":
-                                    oValue = anno.getIntValue(f);
-                                    break;
+                }
+                else {
+                    try {
+                        switch (f.getRange().getName()) {
+                            case "uima.cas.Integer":
+                                oValue = anno.getIntValue(f);
+                                break;
 
-                                case "uima.cas.String":
-                                    oValue = anno.getStringValue(f);
-                                    break;
+                            case "uima.cas.String":
+                                oValue = anno.getStringValue(f);
+                                break;
 
-                                case "uima.cas.Float":
-                                    oValue = anno.getFloatValue(f);
-                                    break;
+                            case "uima.cas.Float":
+                                oValue = anno.getFloatValue(f);
+                                break;
 
-                                case "uima.cas.Boolean":
-                                    oValue = anno.getBooleanValue(f);
-                                    break;
+                            case "uima.cas.Boolean":
+                                oValue = anno.getBooleanValue(f);
+                                break;
 
-                                case "uima.cas.Double":
-                                    oValue = anno.getDoubleValue(f);
-                                    break;
+                            case "uima.cas.Double":
+                                oValue = anno.getDoubleValue(f);
+                                break;
 
-                                case "uima.cas.Long":
-                                    oValue = anno.getLongValue(f);
-                                    break;
+                            case "uima.cas.Long":
+                                oValue = anno.getLongValue(f);
+                                break;
 
-                                default:
+                            default:
 
-                                    oValue = anno.getFeatureValue(f);
+                                oValue = anno.getFeatureValue(f);
 
-                                    if (oValue != null) {
-                                        if (oValue instanceof AnnotationBase) {
-                                            if (!((AnnotationBase) oValue).getView().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText())) {
-                                                oValue = UIMADatabaseInterface.getRealID(((AnnotationBase) oValue));
-                                            }
-                                        } else if ((!anno.getFeatureValue(f).getCAS().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText()))) {
-                                            //                                        if(!ai.getFeatureValue(f).getCAS().getSofa().getSofaID().equals(pJCas.getSofa().getSofaID())) {
-                                            oValue = UIMADatabaseInterface.getRealID(anno.getFeatureValue(f).getCAS().getJCas());
-                                        } else {
-                                            oValue = null;
+                                if (oValue != null) {
+                                    if (oValue instanceof AnnotationBase) {
+                                        if (!((AnnotationBase) oValue).getView().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText())) {
+                                            oValue = UIMADatabaseInterface.getRealID(((AnnotationBase) oValue));
                                         }
-
-
+                                    } else if ((!anno.getFeatureValue(f).getCAS().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText()))) {
+                                        //                                        if(!ai.getFeatureValue(f).getCAS().getSofa().getSofaID().equals(pJCas.getSofa().getSofaID())) {
+                                        oValue = UIMADatabaseInterface.getRealID(anno.getFeatureValue(f).getCAS().getJCas());
+                                    } else {
+                                        oValue = null;
                                     }
 
-                            }
+
+                                }
 
                         }
-                        catch (Exception e){
 
+                    }
+                    catch (Exception e){
+
+                    }
+                }
+
+
+                if(!f.getShortName().equalsIgnoreCase("sofa")) {
+                    if (oValue != null) {
+                        try {
+                            rObject.put(f.getShortName(), oValue);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
+                }
 
-
-                    if(!f.getShortName().equalsIgnoreCase("sofa")) {
-                        if (oValue != null) {
-                            try {
-                                rObject.put(f.getShortName(), oValue);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-
-                });
+            });
             try {
                 rObject.put("id", UIMADatabaseInterface.getID(pJCas));
                 rObject.put("type", anno.getType());
@@ -540,7 +543,7 @@ public class UIMADatabaseInterface {
             }
 
 
-            });
+        });
 
         return rObject;
 
