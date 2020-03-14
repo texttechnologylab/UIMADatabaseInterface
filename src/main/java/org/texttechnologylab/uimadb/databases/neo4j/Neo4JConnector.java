@@ -360,8 +360,8 @@ public class Neo4JConnector implements TransactionEventHandler<Object>, KernelEv
                 creator = creator.on(ptype);
 
                 indexDefinition = creator.create();
-                UIMADatabaseInterface.getLogger().debug(String.format("Percent complete: %1.0f%%",
-                        schema.getIndexPopulationProgress(indexDefinition).getCompletedPercentage()));
+                    UIMADatabaseInterface.getLogger().debug(String.format("Percent complete: %1.0f%%",
+                            schema.getIndexPopulationProgress(indexDefinition).getCompletedPercentage()));
 
             }
 

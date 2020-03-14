@@ -294,20 +294,20 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     @Override
     public long getSize(String sID) {
 
-        DBObject tObject = null;
+            DBObject tObject = null;
 
-        if(sID.contains("/")){
-            tObject = getDBElement(sID.substring(sID.lastIndexOf("/")+1));
-        }
-        else {
-            tObject = getDBElement(sID);
-        }
+            if(sID.contains("/")){
+                tObject = getDBElement(sID.substring(sID.lastIndexOf("/")+1));
+            }
+            else {
+                tObject = getDBElement(sID);
+            }
 
-        String json = JSON.serialize(tObject);
+            String json = JSON.serialize(tObject);
 
-        long length = json.getBytes(StandardCharsets.UTF_8).length;
+            long length = json.getBytes(StandardCharsets.UTF_8).length;
 
-        return length;
+            return length;
 
     }
 
@@ -315,34 +315,34 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     public JCas getElement(String sID) {
         JCas rCas = null;
 
-        DBObject tObject = null;
-        String sFinalID = "";
-        if(sID.contains("/")){
-            sFinalID = sID.substring(sID.lastIndexOf("/")+1);
-            tObject = getDBElement(sFinalID);
-        }
-        else {
-            sFinalID = sID;
-            tObject = getDBElement(sFinalID);
-        }
-
-        String json = JSON.serialize(tObject);
-
-        try {
-            rCas = UIMADatabaseInterface.deserializeJCas(json);
-
-            try{
-                rCas.getView(UIMADatabaseInterface.UIMADBID);
+            DBObject tObject = null;
+            String sFinalID = "";
+            if(sID.contains("/")){
+                sFinalID = sID.substring(sID.lastIndexOf("/")+1);
+                tObject = getDBElement(sFinalID);
             }
-            catch (Exception e){
-                rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
+            else {
+                sFinalID = sID;
+                tObject = getDBElement(sFinalID);
             }
 
-        } catch (UIMAException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            String json = JSON.serialize(tObject);
+
+            try {
+                rCas = UIMADatabaseInterface.deserializeJCas(json);
+
+                try{
+                    rCas.getView(UIMADatabaseInterface.UIMADBID);
+                }
+                catch (Exception e){
+                    rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
+                }
+
+            } catch (UIMAException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
         return rCas;
@@ -351,35 +351,35 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     public JCas getElement(String sID, String sSearch, String sReplace) {
         JCas rCas = null;
 
-        DBObject tObject = null;
-        String sFinalID = "";
-        if(sID.contains("/")){
-            sFinalID = sID.substring(sID.lastIndexOf("/")+1);
-            tObject = getDBElement(sFinalID);
-        }
-        else {
-            sFinalID = sID;
-            tObject = getDBElement(sFinalID);
-        }
-
-        String json = JSON.serialize(tObject);
-        json = json.replaceAll(sSearch, sReplace);
-
-        try {
-            rCas = UIMADatabaseInterface.deserializeJCas(json);
-
-            try{
-                rCas.getView(UIMADatabaseInterface.UIMADBID);
+            DBObject tObject = null;
+            String sFinalID = "";
+            if(sID.contains("/")){
+                sFinalID = sID.substring(sID.lastIndexOf("/")+1);
+                tObject = getDBElement(sFinalID);
             }
-            catch (Exception e){
-                rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
+            else {
+                sFinalID = sID;
+                tObject = getDBElement(sFinalID);
             }
 
-        } catch (UIMAException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            String json = JSON.serialize(tObject);
+            json = json.replaceAll(sSearch, sReplace);
+
+            try {
+                rCas = UIMADatabaseInterface.deserializeJCas(json);
+
+                try{
+                    rCas.getView(UIMADatabaseInterface.UIMADBID);
+                }
+                catch (Exception e){
+                    rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
+                }
+
+            } catch (UIMAException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
         return rCas;

@@ -111,7 +111,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
         String sType = "";
 
-        sType = jCas.getSofa().getType().getName();
+            sType = jCas.getSofa().getType().getName();
 
         return sType;
 
@@ -127,7 +127,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
     @Override
     public JCas createDummy(JCas pCas) throws UIMAException, JSONException {
         NodeTemplate nt = NodeTemplate_Impl.create(this.connector);
-        pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(nt.getID());
+            pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(nt.getID());
         return pCas;
     }
 
@@ -206,194 +206,194 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
         Set<JCas> rCasSet = new HashSet<>(0);
         try {
-            JSONObject queryObject = new JSONObject(sQuery);;
+        JSONObject queryObject = new JSONObject(sQuery);;
 
 
-            Map<String, Object> queryMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<String, Object>();
 
-            queryObject.keys().forEachRemaining(key->{
+        queryObject.keys().forEachRemaining(key->{
 
-                String[] sString = ((String)key).split("\\.");
+            String[] sString = ((String)key).split("\\.");
 
-                if(sString.length==2){
-                    if(sString[0].equalsIgnoreCase("meta")){
-                        try {
-                            queryMap.put(sString[1], queryObject.get((String)key));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+            if(sString.length==2){
+                if(sString[0].equalsIgnoreCase("meta")){
+                    try {
+                        queryMap.put(sString[1], queryObject.get((String)key));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
+            }
 
-            });
-
-
-            Set<NodeTemplate> nSet = new HashSet<>();
-            Set<Node> pNodeSet = null;
+        });
 
 
-            Map<String, Object> filterMap = new HashMap<>(0);
+        Set<NodeTemplate> nSet = new HashSet<>();
+        Set<Node> pNodeSet = null;
 
-            if(queryMap.containsKey("type")) {
 
-                String type = "";
-                for (String key : queryMap.keySet()) {
-                    if (key.equalsIgnoreCase("type")) {
-                        type = (String) queryMap.get("type");
-                    } else {
-                        filterMap.put(key, queryMap.get(key));
-                    }
+        Map<String, Object> filterMap = new HashMap<>(0);
+
+        if(queryMap.containsKey("type")) {
+
+            String type = "";
+            for (String key : queryMap.keySet()) {
+                if (key.equalsIgnoreCase("type")) {
+                    type = (String) queryMap.get("type");
+                } else {
+                    filterMap.put(key, queryMap.get(key));
                 }
+            }
 
-                if (sQuery.contains("$regex")) {
+            if (sQuery.contains("$regex")) {
 
-                    String cypherQuery = "MATCH (n) WHERE n.type = '" + type + "' AND ";
+                String cypherQuery = "MATCH (n) WHERE n.type = '" + type + "' AND ";
 
 
-                    for (String s : filterMap.keySet()) {
+                for (String s : filterMap.keySet()) {
 
-                        Object tObject = filterMap.get(s);
+                    Object tObject = filterMap.get(s);
 
-                        if (tObject instanceof JSONObject) {
+                    if (tObject instanceof JSONObject) {
 
-                            JSONObject sObject = (JSONObject) tObject;
+                        JSONObject sObject = (JSONObject) tObject;
 
-                            if (sObject.toString().contains("$regex")) {
+                        if (sObject.toString().contains("$regex")) {
 
-                                JSONObject regexObject = sObject;
-                                Iterator<String> regIt = regexObject.keys();
+                            JSONObject regexObject = sObject;
+                            Iterator<String> regIt = regexObject.keys();
 
-                                while(regIt.hasNext()){
-                                    String s1 = regIt.next();
-                                    cypherQuery += "( n." + s + " =~ '(?i).*" + regexObject.getString(s1) + "' OR ";
-                                    cypherQuery += " n." + s + " =~ '(?i)" + regexObject.getString(s1) + ".*' OR ";
-                                    cypherQuery += " n." + s + " =~ '(?i).*" + regexObject.getString(s1) + ".*' ) AND ";
-                                }
-
+                            while(regIt.hasNext()){
+                                String s1 = regIt.next();
+                                cypherQuery += "( n." + s + " =~ '(?i).*" + regexObject.getString(s1) + "' OR ";
+                                cypherQuery += " n." + s + " =~ '(?i)" + regexObject.getString(s1) + ".*' OR ";
+                                cypherQuery += " n." + s + " =~ '(?i).*" + regexObject.getString(s1) + ".*' ) AND ";
                             }
 
-                        } else {
-                            cypherQuery += " n." + s + " = " + filterMap.get(s) + " AND ";
-
                         }
 
+                    } else {
+                        cypherQuery += " n." + s + " = " + filterMap.get(s) + " AND ";
+
                     }
-                    cypherQuery = cypherQuery.substring(0, cypherQuery.lastIndexOf("AND"));
-                    cypherQuery += " RETURN n;";
+
+                }
+                cypherQuery = cypherQuery.substring(0, cypherQuery.lastIndexOf("AND"));
+                cypherQuery += " RETURN n;";
 
 //                System.out.println(cypherQuery);
 
-                    try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
-                        Result r = this.connector.executeQuery(cypherQuery);
+                try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
+                    Result r = this.connector.executeQuery(cypherQuery);
 
-                        pNodeSet = new HashSet<>(0);
-                        while(r.hasNext()){
-                            Map<String, Object> tMap = r.next();
-                            Node n = (Node)tMap.get("n");
-                            if(n!=null) {
-                                pNodeSet.add(n);
-                            }
+                    pNodeSet = new HashSet<>(0);
+                    while(r.hasNext()){
+                        Map<String, Object> tMap = r.next();
+                        Node n = (Node)tMap.get("n");
+                        if(n!=null) {
+                            pNodeSet.add(n);
                         }
-                        tx.success();
+                    }
+                    tx.success();
+                }
+
+
+            } else {
+
+
+                if (filterMap.size() == 1) {
+                    for (String s : filterMap.keySet()) {
+                        if (pNodeSet == null && properties.containsKey(s)) {
+                            pNodeSet = this.connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
+                            filterMap.remove(s);
+                        } else {
+                            pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
+                        }
                     }
 
+                } else if (filterMap.size() == 0 && type.length() > 0) {
+                    pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
 
-                } else {
+                }
 
-
-                    if (filterMap.size() == 1) {
-                        for (String s : filterMap.keySet()) {
-                            if (pNodeSet == null && properties.containsKey(s)) {
+                for (String s : filterMap.keySet()) {
+                    if (pNodeSet == null) {
+                        if (!s.equals("type")) {
+                            if (properties.containsKey(s)) {
                                 pNodeSet = this.connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
                                 filterMap.remove(s);
                             } else {
                                 pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
                             }
                         }
-
-                    } else if (filterMap.size() == 0 && type.length() > 0) {
-                        pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
-
                     }
 
-                    for (String s : filterMap.keySet()) {
-                        if (pNodeSet == null) {
-                            if (!s.equals("type")) {
+                }
+                if (pNodeSet == null) {
+                    pNodeSet = new HashSet<>(0);
+                }
+                if (filterMap.size() > 0) {
+                    pNodeSet = pNodeSet.stream().filter(n -> {
+                        try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
+
+                            for (String s : filterMap.keySet()) {
+
                                 if (properties.containsKey(s)) {
-                                    pNodeSet = this.connector.getNodes(Neo4J.getLabel(type), s, filterMap.get(s));
-                                    filterMap.remove(s);
-                                } else {
-                                    pNodeSet = this.connector.getNodes(Neo4J.getLabel(type));
-                                }
-                            }
-                        }
-
-                    }
-                    if (pNodeSet == null) {
-                        pNodeSet = new HashSet<>(0);
-                    }
-                    if (filterMap.size() > 0) {
-                        pNodeSet = pNodeSet.stream().filter(n -> {
-                            try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
-
-                                for (String s : filterMap.keySet()) {
-
-                                    if (properties.containsKey(s)) {
-                                        Object tObject = properties.get(s);
-                                        if (n.hasProperty(s)) {
-                                            if (n.getProperty(s).equals(filterMap.get(s))) {
-                                                return true;
-                                            }
+                                    Object tObject = properties.get(s);
+                                    if (n.hasProperty(s)) {
+                                        if (n.getProperty(s).equals(filterMap.get(s))) {
+                                            return true;
                                         }
-                                    } else if (relations.containsKey(s)) {
+                                    }
+                                } else if (relations.containsKey(s)) {
 
-                                        if (n.hasRelationship(Direction.OUTGOING, new TTRelationshipType(relations.get(s)))) {
+                                    if (n.hasRelationship(Direction.OUTGOING, new TTRelationshipType(relations.get(s)))) {
 
-                                            Iterator<Relationship> relIt = n.getRelationships(Direction.BOTH, new TTRelationshipType(relations.get(s))).iterator();
-                                            boolean found = false;
+                                        Iterator<Relationship> relIt = n.getRelationships(Direction.BOTH, new TTRelationshipType(relations.get(s))).iterator();
+                                        boolean found = false;
 
-                                            while (relIt.hasNext() && !found) {
+                                        while (relIt.hasNext() && !found) {
 
-                                                Relationship r = relIt.next();
+                                            Relationship r = relIt.next();
 
-                                                if (r.getEndNode().getId() == (long) filterMap.get(s)) {
-                                                    found = true;
-                                                }
-
+                                            if (r.getEndNode().getId() == (long) filterMap.get(s)) {
+                                                found = true;
                                             }
 
-                                            return found;
-
                                         }
+
+                                        return found;
 
                                     }
 
                                 }
-                                tx.success();
+
                             }
-                            return false;
+                            tx.success();
+                        }
+                        return false;
 
-                        }).collect(Collectors.toSet());
-
-
-                    }
+                    }).collect(Collectors.toSet());
 
 
                 }
+
+
             }
+        }
 
-            if(pNodeSet!=null){
-                pNodeSet.stream().forEach(n -> {
+        if(pNodeSet!=null){
+            pNodeSet.stream().forEach(n -> {
 
-                    NodeTemplate_Impl nt = new NodeTemplate_Impl(n, this.connector);
+                NodeTemplate_Impl nt = new NodeTemplate_Impl(n, this.connector);
 
-                    try {
-                        rCasSet.add(nt.getJCas());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
+                try {
+                    rCasSet.add(nt.getJCas());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
 
         } catch (JSONException e) {
             e.printStackTrace();

@@ -142,37 +142,37 @@ public class NodeTemplate_Impl implements NodeTemplate {
                         jObject = internalObject.get((String)key);
 
 
-                        if (jObject instanceof JSONArray) {
+                    if (jObject instanceof JSONArray) {
 
-                            JSONArray idArray = internalObject.getJSONArray((String)key);
+                        JSONArray idArray = internalObject.getJSONArray((String)key);
 
-                            for(int a=0; a<idArray.length(); a++){
-                                String lid = idArray.getString(a);
+                        for(int a=0; a<idArray.length(); a++){
+                            String lid = idArray.getString(a);
 
-                                NodeTemplate tNode = new NodeTemplate_Impl(pConnector.getNode(lid), pConnector);
-                                if(tNode!=null) {
-                                    addRelationship((String) key, tNode);
-                                }
+                            NodeTemplate tNode = new NodeTemplate_Impl(pConnector.getNode(lid), pConnector);
+                            if(tNode!=null) {
+                                addRelationship((String) key, tNode);
                             }
-
-                        } else {
-                            if(key.equals("type")){
-                                setProperty((String)key, internalObject.get((String)key));
-                                this.pNode.addLabel(Neo4J.getLabel(internalObject.getString((String)key)));
-                            }
-
-                            if(Neo4J.properties.containsKey(key)){
-                                setProperty((String)key, internalObject.get((String)key));
-                            }
-                            else if(Neo4J.relations.containsKey(key)){
-                                String lid = internalObject.getString((String)key);
-                                NodeTemplate tNode = new NodeTemplate_Impl(pConnector.getNode(lid), pConnector);
-                                addRelationship((String)key, tNode);
-                            }
-
-
-
                         }
+
+                    } else {
+                        if(key.equals("type")){
+                            setProperty((String)key, internalObject.get((String)key));
+                            this.pNode.addLabel(Neo4J.getLabel(internalObject.getString((String)key)));
+                        }
+
+                        if(Neo4J.properties.containsKey(key)){
+                            setProperty((String)key, internalObject.get((String)key));
+                        }
+                        else if(Neo4J.relations.containsKey(key)){
+                            String lid = internalObject.getString((String)key);
+                            NodeTemplate tNode = new NodeTemplate_Impl(pConnector.getNode(lid), pConnector);
+                            addRelationship((String)key, tNode);
+                        }
+
+
+
+                    }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -197,14 +197,14 @@ public class NodeTemplate_Impl implements NodeTemplate {
 
         NodeTemplate tTemplate = null;
 
-        Label pLabel = Neo4J.getLabel(sLabel);
+            Label pLabel = Neo4J.getLabel(sLabel);
 
-        if(pLabel!=null){
-            try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
-                tTemplate = new NodeTemplate_Impl(Neo4JConnector.gdbs.createNode(pLabel), pConnector);
-                tx.success();
+            if(pLabel!=null){
+                try (Transaction tx = Neo4JConnector.gdbs.beginTx()) {
+                    tTemplate = new NodeTemplate_Impl(Neo4JConnector.gdbs.createNode(pLabel), pConnector);
+                    tx.success();
+                }
             }
-        }
 
         return tTemplate;
 

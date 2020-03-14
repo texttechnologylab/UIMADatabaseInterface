@@ -154,23 +154,23 @@ public class ElasticsearchConnector {
 
         Settings.Builder b = Settings.builder();
 
-        JSONObject pObject = new JSONObject(sDefaults);
+            JSONObject pObject = new JSONObject(sDefaults);
 
-        pObject.keySet().forEach(k->{
-            b.put(k, pObject.getInt(k));
-        });
+            pObject.keySet().forEach(k->{
+                b.put(k, pObject.getInt(k));
+            });
 
-        request.settings(b);
+            request.settings(b);
 
-        try{
-            CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
-            return createIndexResponse.index();
-        }
-        catch (Exception e){
-            System.out.println("Index already exists");
-        }
+            try{
+                CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
+                return createIndexResponse.index();
+            }
+            catch (Exception e){
+                System.out.println("Index already exists");
+            }
 
-        return "";
+            return "";
     }
 
     public String insert(JSONObject pObject) throws IOException {
