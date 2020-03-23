@@ -6,6 +6,7 @@ Currently the following databases are supported:
 * Neo4J
 * Elasticsearch
 * Couchbase
+* Virtuoso (C++)
 
 
 ## Cite
