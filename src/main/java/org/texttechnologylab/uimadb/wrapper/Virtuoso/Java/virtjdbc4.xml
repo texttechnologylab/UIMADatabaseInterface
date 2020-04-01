@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="virtjdbc4">
+    <CLASSES>
+      <root url="jar://C:/Program Files/OpenLink Software/Virtuoso OpenSource 7.2/lib/jdbc-4.0/virtjdbc4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
