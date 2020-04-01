@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
+import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseConfig;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseConnection;
 import org.texttechnologylab.uimadb.wrapper.couchbase.CouchbaseHelper;
@@ -215,7 +216,7 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     }
 
     @Override
-    public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException, CASException {
+    public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         // replace existing document with updated version
         try {
             updateElement(pJCas, false);
@@ -306,7 +307,7 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     }
 
     @Override
-    public Set<JCas> getElements(String sQuery) throws UIMAException, IOException {
+    public Set<JCas> getElements(String sQuery) {
         // return results of query as Set of JCas'
         // only use if Query returns whole documents, otherwise deserializeJCas runs into problems currently
 
@@ -322,19 +323,24 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
             JsonObject jsonObject = row.value();
             String jsonString = jsonObject.toString();
             System.out.println(jsonString);
-            JCas rCasObject = UIMADatabaseInterface.deserializeJCas(jsonString);
+            JCas rCasObject = null;
+            try {
+                rCasObject = UIMADatabaseInterface.deserializeJCas(jsonString);
+            } catch (UIMAException e) {
+                e.printStackTrace();
+            }
             rCas.add(rCasObject);
         }
         return rCas;
     }
 
     @Override
-    public Set<JCas> getElementsDirect(String sQuery) throws UIMAException, IOException {
+    public Set<JCas> getElementsDirect(String sQuery) {
         return getElements(sQuery);
     }
 
     @Override
-    public Set<JCas> getElementsDirect(String sQuery, String queryValue) throws UIMAException, IOException {
+    public Set<JCas> getElementsDirect(String sQuery, String queryValue) {
         return getElementsDirect(sQuery);
     }
 
@@ -349,18 +355,18 @@ public class Couchbase extends CouchbaseHelper implements UIMADatabaseInterfaceS
     }
 
     @Override
-    public Set<JCas> getElements(KeyValue... kvs) throws UIMAException, IOException {
+    public Set<JCas> getElements(KeyValue... kvs) {
         StringBuilder sb = new StringBuilder();
         return getElements(sb.toString());
     }
 
     @Override
-    public Set<JCas> getElementsByGeoLocation(double lat, double lon, double distance) throws UIMAException, IOException {
+    public Set<JCas> getElementsByGeoLocation(double lat, double lon, double distance) {
         return getElementsByGeoLocation("", lat, lon, distance);
     }
 
     @Override
-    public Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance) throws UIMAException, IOException {
+    public Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance) {
         // not working
 
         JsonObject geoWithin = JsonObject.empty();

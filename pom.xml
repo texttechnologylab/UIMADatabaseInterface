@@ -6,7 +6,7 @@
 
     <groupId>org.texttechnologylab.annotation</groupId>
     <artifactId>UIMADatabaseInterface</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
 
     <repositories>
         <repository>
@@ -62,16 +62,33 @@
     </build>
 
     <dependencies>
+
         <dependency>
-            <groupId>org.hucompute.textimager.uima</groupId>
+            <groupId>com.github.texttechnologylab</groupId>
+            <artifactId>UIMATypeSystem</artifactId>
+            <version>master-4262ceb3c8-1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.texttechnologylab</groupId>
             <artifactId>textimager-uima</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>54dda3f4af</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.texttechnologylab.annotation</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.texttechnologylab</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.texttechnologylab.annotation</groupId>
-            <artifactId>typesystem</artifactId>
-            <version>1.7.5</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.texttechnologylab.annotation</groupId>-->
+<!--            <artifactId>typesystem</artifactId>-->
+<!--            <version>1.7.5</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.github.jitpack</groupId>
             <artifactId>maven-modular</artifactId>
@@ -88,11 +105,7 @@
             <artifactId>Utilities</artifactId>
             <version>1.0.2-uima-2.10.4</version>
         </dependency>
-        <dependency>
-            <groupId>org.texttechnologylab.annotation</groupId>
-            <artifactId>typesystem</artifactId>
-            <version>1.7.5</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
         <dependency>
             <groupId>org.mongodb</groupId>

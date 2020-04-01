@@ -31,9 +31,11 @@ import org.apache.commons.collections.KeyValue;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.fit.util.CasIOUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONArray;
@@ -46,6 +48,8 @@ import org.texttechnologylab.uimadb.wrapper.mongo.MongoHelper;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.SerializerInitializationException;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.UnknownFactoryException;
+import org.texttechnologylab.utilities.helper.FileUtils;
+import org.texttechnologylab.utilities.helper.StringUtils;
 import org.texttechnologylab.utilities.helper.TempFileHandler;
 
 import java.io.File;
@@ -123,7 +127,28 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         FileOutputStream streamToDownloadTo = new FileOutputStream(tf2);
         getBucketConnection().downloadToStream(new ObjectId(sID), streamToDownloadTo);
         streamToDownloadTo.close();
-        System.out.println(streamToDownloadTo.toString());
+
+        JCas rCas = JCasFactory.createJCas();
+        CasIOUtil.readXmi(rCas, tf2);
+
+        return rCas;
+
+    }
+    public JCas getElementGridFS(String sID, String sSearch, String sReplace) throws IOException, UIMAException {
+
+        File tf2 = TempFileHandler.getTempFile("aaa", "bbb");
+        FileOutputStream streamToDownloadTo = new FileOutputStream(tf2);
+        getBucketConnection().downloadToStream(new ObjectId(sID), streamToDownloadTo);
+        streamToDownloadTo.close();
+
+        String sFile = FileUtils.getContentFromFile(tf2);
+        System.out.println(tf2.getName());
+        sFile = sFile.replace(sSearch, sReplace);
+        StringUtils.writeContent(sFile, tf2);
+
+//        for (String s : TypeSystemDescriptionFactory.scanTypeDescriptors()) {
+//            System.out.println(s);
+//        }
 
         JCas rCas = JCasFactory.createJCas();
         CasIOUtil.readXmi(rCas, tf2);
