@@ -197,11 +197,11 @@
 <!--            <artifactId>couchbase-client</artifactId>-->
 <!--            <version>1.4.13</version>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>com.couchbase.client</groupId>
-            <artifactId>java-client</artifactId>
-            <version>2.7.11</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.couchbase.client</groupId>-->
+<!--            <artifactId>java-client</artifactId>-->
+<!--            <version>2.7.11</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.couchbase.client</groupId>
             <artifactId>core-io</artifactId>
