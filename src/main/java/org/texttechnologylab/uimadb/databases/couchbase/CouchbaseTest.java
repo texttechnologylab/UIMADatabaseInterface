@@ -15,7 +15,6 @@ import java.util.List;
 
 public class CouchbaseTest {
 
-    @org.junit.Test
     public void testConnection() throws UIMAException, JSONException, IOException {
         uploadXmiData(); // upload XmiData to Couchbase. Uses chunking.
         downloadXmiData(); // download Data from Couchbase and write to xmi_output
