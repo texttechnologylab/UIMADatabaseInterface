@@ -435,7 +435,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 //
 //    }
 
-    private DBObject getDBElement(String sID){
+    private DBObject negetDBElement(String sID){
 
         DBObject rElement = null;
 

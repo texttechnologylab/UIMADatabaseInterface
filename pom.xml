@@ -87,9 +87,12 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.texttechnologylab</groupId>
-            <artifactId>UIMATypeSystem</artifactId>
-            <version>1.8.2</version>
+<!--            <groupId>com.github.texttechnologylab</groupId>-->
+<!--            <artifactId>UIMATypeSystem</artifactId>-->
+<!--            <version>1.8.3</version>-->
+            <groupId>org.texttechnologylab.annotation</groupId>
+            <artifactId>typesystem</artifactId>
+            <version>1.8.3</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->

@@ -102,7 +102,7 @@ public abstract class MongoHelper {
         return jCas;
     }
 
-    private DBObject getDBElement(String sID){
+    public DBObject getDBElement(String sID){
 
         DBObject rElement = null;
 
