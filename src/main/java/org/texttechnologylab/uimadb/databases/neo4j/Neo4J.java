@@ -29,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.neo4j.graphdb.*;
+
 import org.texttechnologylab.uimadb.UIMADatabaseInterface;
 import org.texttechnologylab.uimadb.UIMADatabaseInterfaceService;
 import org.texttechnologylab.uimadb.wrapper.mongo.serilization.exceptions.CasSerializationException;
@@ -512,6 +513,7 @@ public class Neo4J implements UIMADatabaseInterfaceService {
 
     @Override
     public Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance) {
+
         Set<Node> nSet = this.connector.getNodesFromSpatialLayer(new Coordinate(lon, lat), distance);
 
         Set<JCas> jSet = new HashSet<>(0);
