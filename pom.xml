@@ -127,11 +127,16 @@
             <version>3.2.2</version>
         </dependency>
         <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-spatial</artifactId>
-            <version>0.24-neo4j-3.1.1</version>
-            <type>jar</type>
+            <groupId>com.github.neo4j-contrib</groupId>
+            <artifactId>spatial</artifactId>
+            <version>0.26.1-neo4j-3.5.2</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.neo4j</groupId>-->
+<!--            <artifactId>neo4j-spatial</artifactId>-->
+<!--            <version>0.24-neo4j-3.1.1</version>-->
+<!--            <type>jar</type>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.siemens.ct.exi</groupId>
             <artifactId>exificient-for-json</artifactId>
