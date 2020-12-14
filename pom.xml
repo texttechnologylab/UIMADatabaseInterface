@@ -15,6 +15,11 @@
             <url>https://repo.maven.apache.org/maven2</url>
         </repository>
         <repository>
+            <id>osgeo</id>
+            <name>OSGeo Release Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+        <repository>
             <id>neo4j-contrib-releases</id>
             <url>https://raw.github.com/neo4j-contrib/m2/master/releases</url>
             <releases>
@@ -165,10 +170,23 @@
             <artifactId>neo4j-enterprise</artifactId>
             <version>3.2.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+            <version>14.4</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.neo4j-contrib</groupId>
             <artifactId>spatial</artifactId>
             <version>0.26.1-neo4j-3.5.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.geotools</groupId>
+                    <artifactId>gt-main</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.neo4j</groupId>-->
