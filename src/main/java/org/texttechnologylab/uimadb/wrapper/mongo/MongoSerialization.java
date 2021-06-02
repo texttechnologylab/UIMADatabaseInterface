@@ -50,6 +50,8 @@ public class MongoSerialization {
 
         ICasSerializer serializer = CasSerializerMetaFactory.Instance().getFactory(getSerializerFactory()).createSerializer();
 
+        serializer.deserialize(pTarget.getCas(), sInput);
+
         JCas rCas = pTarget;
 
         return rCas;
