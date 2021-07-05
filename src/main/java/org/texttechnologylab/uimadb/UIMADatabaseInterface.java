@@ -22,15 +22,14 @@ package org.texttechnologylab.uimadb;
 import org.apache.log4j.Logger;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CASException;
-import org.apache.uima.cas.FSIterator;
 import org.apache.uima.cas.Feature;
-import org.apache.uima.cas.SofaFS;
 import org.apache.uima.fit.factory.JCasFactory;
-import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.fit.testing.util.DisableLogging;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.cas.*;
+import org.apache.uima.jcas.cas.AnnotationBase;
+import org.apache.uima.jcas.cas.FSArray;
+import org.apache.uima.jcas.cas.TOP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -230,23 +229,51 @@ public class UIMADatabaseInterface {
      * @param <T>
      * @return
      */
-    public static <T extends TOP> Collection<T> convertList(Set<JCas> jCasSet, Class<T> type){
+    public static <T extends TOP> Collection<T> convertList(Set<JCas> jCasSet, Class<T> type) {
 
         Collection<T> rSet = new HashSet<>(0);
 
-        for(JCas j : jCasSet){
+        for(JCas j : jCasSet) {
 
-            j.getSofaIterator().forEachRemaining(s->{
-                if(!s.getSofaID().contains("_")){
-                    JCas pCas = JCasUtil.getView(j, s.getSofaID(), false);
-                    Collection<T> tSet = JCasUtil.select(pCas, type);
-                    if(tSet.size()>0){
-                        rSet.addAll(tSet);
+            Iterator<JCas> cIterator = null;
+            try {
+                cIterator = j.getViewIterator();
+
+            while (cIterator.hasNext()) {
+                JCas view = cIterator.next();
+
+                //JCas view = pCas.getView(UIMADBID);
+
+                if (view != null) {
+                    try {
+                        rSet.add(JCasUtil.selectSingle(view, type));
+                    }
+                    catch (Exception ex){
+//                        getErrorLogger().error(ex.getMessage());
                     }
                 }
-            });
+
+            }
+            } catch (CASException e) {
+                e.printStackTrace();
+            }
+
 
         }
+
+//        for(JCas j : jCasSet){
+//
+//            j.getSofaIterator().forEachRemaining(s->{
+//                if(!s.getSofaID().contains("_")){
+//                    JCas pCas = JCasUtil.getView(j, s.getSofaID(), false);
+//                    Collection<T> tSet = JCasUtil.select(pCas, type);
+//                    if(tSet.size()>0){
+//                        rSet.addAll(tSet);
+//                    }
+//                }
+//            });
+//
+//        }
 
         return rSet;
     }
@@ -259,20 +286,33 @@ public class UIMADatabaseInterface {
      * @param <T>
      * @return
      */
-    public static <T extends TOP> T convert(JCas jCas, Class<T> type){
+    public static <T extends TOP> T convert(JCas jCas, Class<T> type) throws CASException {
 
         T rType = null;
 
+            Iterator<JCas> cIterator = jCas.getViewIterator();
 
-            FSIterator<SofaFS> sofaIterator = jCas.getSofaIterator();
+            while(cIterator.hasNext()){
+                JCas pCas = cIterator.next();
 
-            while(sofaIterator.hasNext()){
-                SofaFS sfs = sofaIterator.next();
-                if(!sfs.getSofaID().contains("_")){
-                    JCas pCas = JCasUtil.getView(jCas, sfs.getSofaID(), false);
+//                JCas view = pCas.getView(UIMADBID);
+
+                if(pCas!=null){
                     rType = JCasUtil.selectSingle(pCas, type);
                 }
+
             }
+
+//
+//            FSIterator<SofaFS> sofaIterator = jCas.getSofaIterator();
+//
+//            while(sofaIterator.hasNext()){
+//                SofaFS sfs = sofaIterator.next();
+//                if(!sfs.getSofaID().contains("_")){
+//                    JCas pCas = JCasUtil.getView(jCas, sfs.getSofaID(), false);
+//                    rType = JCasUtil.selectSingle(pCas, type);
+//                }
+//            }
 
         return rType;
     }

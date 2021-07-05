@@ -213,6 +213,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
         String oID = doc.get("_id").toString();
         pCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(oID);
+
         return pCas;
     }
 
