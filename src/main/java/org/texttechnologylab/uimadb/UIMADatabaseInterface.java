@@ -297,8 +297,13 @@ public class UIMADatabaseInterface {
 
 //                JCas view = pCas.getView(UIMADBID);
 
-                if(pCas!=null){
-                    rType = JCasUtil.selectSingle(pCas, type);
+                if(pCas!=null && rType!=null){
+                    try {
+                        rType = JCasUtil.selectSingle(pCas, type);
+                    }
+                    catch (Exception e){
+
+                    }
                 }
 
             }
