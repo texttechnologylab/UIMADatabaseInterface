@@ -245,11 +245,14 @@ public class UIMADatabaseInterface {
                 //JCas view = pCas.getView(UIMADBID);
 
                 if (view != null) {
-                    try {
-                        rSet.add(JCasUtil.selectSingle(view, type));
-                    }
-                    catch (Exception ex){
+
+                    if(!view.getViewName().equalsIgnoreCase(UIMADBID)) {
+
+                        try {
+                            rSet.add(JCasUtil.selectSingle(view, type));
+                        } catch (Exception ex) {
 //                        getErrorLogger().error(ex.getMessage());
+                        }
                     }
                 }
 
@@ -297,12 +300,14 @@ public class UIMADatabaseInterface {
 
 //                JCas view = pCas.getView(UIMADBID);
 
-                if(pCas!=null && rType==null){
-                    try {
-                        rType = JCasUtil.selectSingle(pCas, type);
-                    }
-                    catch (Exception e){
+                if(!pCas.getViewName().equalsIgnoreCase(UIMADBID)) {
 
+                    if (pCas != null && rType == null) {
+                        try {
+                            rType = JCasUtil.selectSingle(pCas, type);
+                        } catch (Exception e) {
+
+                        }
                     }
                 }
 
