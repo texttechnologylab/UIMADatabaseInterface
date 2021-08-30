@@ -38,12 +38,14 @@ public abstract class MongoHelper {
     public MongoHelper(MongoConnection mc) throws ResourceInitializationException {
 
        MongoConnection conn = mc;
+       this.conn = conn;
        coll = conn.coll;
 
     }
 
     public MongoHelper(String sAdress, String mongoDatabase, String mongoCollection, String sUsername, String sPassword) throws ResourceInitializationException {
         MongoConnection conn = new MongoConnection(sAdress, mongoDatabase, mongoCollection, sUsername, sPassword);
+        this.conn = conn;
         coll = conn.coll;
     }
 

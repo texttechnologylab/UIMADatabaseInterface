@@ -32,7 +32,8 @@ public class MongoConnection {
         MongoClient mongoClient = new MongoClient(seeds, creds);
         this.db = mongoClient.getDB(sDatabase);
         this.coll = this.db.getCollection(sCollection);
-    }
+        System.out.println(this.sDatabase);
+            }
 
     public MongoConnection(String sHost, String sDatabase, String sCollection) {
         this.mongoConfig = null;
@@ -40,12 +41,14 @@ public class MongoConnection {
         MongoClient mongoClient = new MongoClient(sHost);
         this.db = mongoClient.getDB(sDatabase);
         this.coll = this.db.getCollection(sCollection);
+        System.out.println(this.sDatabase);
     }
 
     public MongoConnection(MongoConfig mongoConfig) throws UnknownHostException, MongoException {
         this(mongoConfig.getHost(), mongoConfig.getDatabaseName(), mongoConfig.getCollection(), mongoConfig.getUsername(), mongoConfig.getPassword());
         this.mongoConfig = mongoConfig;
         this.sDatabase = this.mongoConfig.getDatabaseName();
+        System.out.println(this.sDatabase);
     }
 
     public String toString() {
