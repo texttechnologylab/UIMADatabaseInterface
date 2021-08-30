@@ -80,7 +80,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
     public GridFSBucket getBucketConnection(){
 
-        GridFSBucket gridFSBucket = GridFSBuckets.create(this.getConnection().getDB().getMongoClient().getDatabase("rieb"), "TextAnnotator");
+        GridFSBucket gridFSBucket = GridFSBuckets.create(this.getConnection().getDB().getMongoClient().getDatabase(this.getConfigConnection().getDatabaseName()), "TextAnnotator");
         return gridFSBucket;
 
     }

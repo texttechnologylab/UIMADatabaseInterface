@@ -180,4 +180,8 @@ public abstract class MongoHelper {
         return coll;
     }
 
+    public MongoConnection getConfigConnection(){
+        return conn;
+    }
+
 }
