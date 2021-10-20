@@ -552,10 +552,11 @@ public class UIMADatabaseInterface {
 
                                     if (oValue != null) {
                                         if (oValue instanceof AnnotationBase) {
-                                            if (!((AnnotationBase) oValue).getView().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText())) {
+                                            if (((AnnotationBase) oValue).getView().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText())) {
                                                 oValue = UIMADatabaseInterface.getRealID(((AnnotationBase) oValue));
                                             }
-                                        } else if ((!anno.getFeatureValue(f).getCAS().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText()))) {
+                                        } else if ((anno.getFeatureValue(f).getCAS().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText()))) {
+                                        //} else if ((!anno.getFeatureValue(f).getCAS().getView(UIMADBID).getDocumentText().equals(pJCas.getView(UIMADBID).getDocumentText()))) {
                                             //                                        if(!ai.getFeatureValue(f).getCAS().getSofa().getSofaID().equals(pJCas.getSofa().getSofaID())) {
                                             oValue = UIMADatabaseInterface.getRealID(anno.getFeatureValue(f).getCAS().getJCas());
                                         } else {
