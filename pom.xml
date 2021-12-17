@@ -6,7 +6,7 @@
 
     <groupId>org.texttechnologylab</groupId>
     <artifactId>UIMADatabaseInterface</artifactId>
-    <version>1.1.3</version>
+    <version>1.1.4</version>
 
     <repositories>
         <repository>
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
             <artifactId>Utilities</artifactId>
-            <version>1.0.9-uima-2.10.4</version>
+            <version>1.1.5-uima-2.10.4</version>
         </dependency>
 
         <dependency>
