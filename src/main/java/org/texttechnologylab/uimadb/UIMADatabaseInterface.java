@@ -19,7 +19,8 @@ package org.texttechnologylab.uimadb;
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.cas.Feature;
@@ -103,14 +104,14 @@ public class UIMADatabaseInterface {
 
     public static Logger getLogger(){
         if(logger==null){
-            logger = Logger.getLogger("Main");
+            logger = LogManager.getLogger("Main");
         }
         return logger;
     }
 
     public static Logger getErrorLogger(){
         if(errorLogger==null){
-            errorLogger = Logger.getLogger("Error");
+            errorLogger = LogManager.getLogger("Error");
         }
         return errorLogger;
     }
