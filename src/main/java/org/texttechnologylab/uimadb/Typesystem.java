@@ -23,12 +23,19 @@ import org.apache.uima.UIMAException;
 import org.apache.uima.cas.Type;
 import org.apache.uima.cas.TypeSystem;
 import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.AnnotationBase;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -127,6 +134,14 @@ public class Typesystem {
 
         return rArray;
 
+    }
+
+    public static void exportTypeSystem() throws ResourceInitializationException, IOException, SAXException {
+        exportTypeSystem(new File("/tmp/typesystem.xml"));
+    }
+
+    public static void exportTypeSystem(File tFile) throws ResourceInitializationException, IOException, SAXException {
+        TypeSystemDescriptionFactory.createTypeSystemDescription().toXML(new FileOutputStream(tFile));
     }
 
 }
