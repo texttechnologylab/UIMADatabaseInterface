@@ -20,23 +20,25 @@ package org.texttechnologylab.uimadb.databases.mongo;
  */
 
 import com.mongodb.*;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
-import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.GridFSUploadStream;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
-import com.mongodb.client.internal.MongoDatabaseImpl;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import com.mongodb.lang.Nullable;
 import com.mongodb.util.JSON;
 import org.apache.commons.collections.KeyValue;
 import org.apache.uima.UIMAException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.factory.JCasFactory;
-import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
 import org.apache.uima.fit.util.CasIOUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.apache.uima.resource.metadata.TypeSystemDescription;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,12 +61,14 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
- *  Implementation of the UIMADatabaseInterfaceService to use a MongoDB instance.
+ * Implementation of the UIMADatabaseInterfaceService to use a MongoDB instance.
  */
 public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
+    private static String gridFSName = "TextAnnotator";
 
     public Mongo(String sHost, String sDatabase, String sCollection, String sUsername, String sPassword) throws ResourceInitializationException {
         super(new MongoConnection(sHost, sDatabase, sCollection, sUsername, sPassword));
@@ -78,24 +82,30 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         super(new MongoConfig(configFile));
     }
 
-    public GridFSBucket getBucketConnection(){
+    public GridFSBucket getBucketConnection() {
 
-        GridFSBucket gridFSBucket = GridFSBuckets.create(this.getConnection().getDB().getMongoClient().getDatabase(this.getConfigConnection().getDatabaseName()), "TextAnnotator");
+        GridFSBucket gridFSBucket = GridFSBuckets.create(this.getConnection().getDB().getMongoClient().getDatabase(this.getConfigConnection().getDatabaseName()), gridFSName);
         return gridFSBucket;
 
     }
 
-    public GridFSUploadOptions getGridFSOptions(){
+    public MongoCollection<Document> getGridFSCollection() {
+        return this.getConnection().getDB().getMongoClient().getDatabase(this.getConfigConnection().getDatabaseName()).getCollection(gridFSName + ".files");
+    }
 
+    public GridFSUploadOptions getGridFSOptions() {
         GridFSUploadOptions options = new GridFSUploadOptions()
                 .chunkSizeBytes(358400)
                 .metadata(new Document("type", "uima"));
 
         return options;
-
     }
 
-    public String createElementGridFS(JCas jcas) throws IOException {
+    public String createElementGridFS(JCas jCas) throws IOException {
+        return createElementGridFS(jCas, null);
+    }
+
+    public String createElementGridFS(JCas jcas, @Nullable Document statistics) throws IOException {
 
         GridFSUploadOptions options = new GridFSUploadOptions()
                 .chunkSizeBytes(358400)
@@ -116,7 +126,12 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         } catch (CASException e) {
             e.printStackTrace();
         }
-
+        try {
+            if (statistics != null)
+                getGridFSCollection().updateOne(Filters.eq("_id", uploadStream.getObjectId()), Updates.set("metadata.statistics", statistics));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return uploadStream.getObjectId().toString();
 
     }
@@ -134,6 +149,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         return rCas;
 
     }
+
     public JCas getElementGridFS(String sID, String sSearch, String sReplace) throws IOException, UIMAException {
 
         File tf2 = TempFileHandler.getTempFile("aaa", "bbb");
@@ -157,18 +173,55 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
     }
 
+    public Set<ObjectId> getGridFSObjectIds(Bson filter) {
+        Set<ObjectId> rIds = new HashSet<>();
+        GridFSBucket connection = getBucketConnection();
+        for (GridFSFile file : connection.find(filter)) {
+            rIds.add(file.getObjectId());
+        }
+        return rIds;
+    }
+
+    public Set<ObjectId> getGridFSObjectIds(List<? extends Bson> aggregation) {
+        Set<ObjectId> rIds = new HashSet<>();
+        for (Document document : getGridFSCollection().aggregate(aggregation)) {
+            rIds.add((document.getObjectId("_id")));
+        }
+        return rIds;
+    }
+
+    public Set<JCas> getElementsGridFS(Bson filter) throws IOException, UIMAException {
+        Set<JCas> rCas = new HashSet<>();
+        for (ObjectId id : getGridFSObjectIds(filter)) {
+            rCas.add(getElementGridFS(id.toString()));
+        }
+        return rCas;
+    }
+
+
+    public Set<JCas> getElementsGridFS(List<? extends Bson> aggregation) throws IOException, UIMAException {
+        Set<JCas> rCas = new HashSet<>();
+        for (ObjectId id : getGridFSObjectIds(aggregation)) {
+            rCas.add(getElementGridFS(id.toString()));
+        }
+        return rCas;
+    }
+
     public void deleteElementGridFS(String sMongoID) throws CASException {
 
         try {
             getBucketConnection().delete(new ObjectId(sMongoID));
-        }
-        catch (MongoGridFSException e){
+        } catch (MongoGridFSException e) {
             e.printStackTrace();
         }
 
     }
 
     public String updateElementGridFS(String sMongoID, JCas jcas) throws IOException, CASException {
+        return updateElementGridFS(sMongoID, jcas, null);
+    }
+
+    public String updateElementGridFS(String sMongoID, JCas jcas, @Nullable Document statistics) throws IOException, CASException {
 
         deleteElementGridFS(sMongoID);
 
@@ -185,11 +238,15 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         byte[] data = Files.readAllBytes(tf.toPath());
         uploadStream.write(data);
         uploadStream.close();
-
+        try {
+            if (statistics != null)
+                getGridFSCollection().updateOne(Filters.eq("_id", uploadStream.getObjectId()), Updates.set("metadata.statistics", statistics));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return uploadStream.getObjectId().toString();
 
     }
-
 
 
     @Override
@@ -270,7 +327,6 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     }
 
 
-
     public void updateElement(JCas pJCas) throws CasSerializationException, SerializerInitializationException, UnknownFactoryException {
         updateElement(pJCas, false);
     }
@@ -320,20 +376,19 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     @Override
     public long getSize(String sID) {
 
-            DBObject tObject = null;
+        DBObject tObject = null;
 
-            if(sID.contains("/")){
-                tObject = getDBElement(sID.substring(sID.lastIndexOf("/")+1));
-            }
-            else {
-                tObject = getDBElement(sID);
-            }
+        if (sID.contains("/")) {
+            tObject = getDBElement(sID.substring(sID.lastIndexOf("/") + 1));
+        } else {
+            tObject = getDBElement(sID);
+        }
 
-            String json = JSON.serialize(tObject);
+        String json = JSON.serialize(tObject);
 
-            long length = json.getBytes(StandardCharsets.UTF_8).length;
+        long length = json.getBytes(StandardCharsets.UTF_8).length;
 
-            return length;
+        return length;
 
     }
 
@@ -341,34 +396,32 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     public JCas getElement(String sID) {
         JCas rCas = null;
 
-            DBObject tObject = null;
-            String sFinalID = "";
-            if(sID.contains("/")){
-                sFinalID = sID.substring(sID.lastIndexOf("/")+1);
-                tObject = getDBElement(sFinalID);
-            }
-            else {
-                sFinalID = sID;
-                tObject = getDBElement(sFinalID);
-            }
+        DBObject tObject = null;
+        String sFinalID = "";
+        if (sID.contains("/")) {
+            sFinalID = sID.substring(sID.lastIndexOf("/") + 1);
+            tObject = getDBElement(sFinalID);
+        } else {
+            sFinalID = sID;
+            tObject = getDBElement(sFinalID);
+        }
 
-            String json = JSON.serialize(tObject);
+        String json = JSON.serialize(tObject);
+
+        try {
+            rCas = UIMADatabaseInterface.deserializeJCas(json);
 
             try {
-                rCas = UIMADatabaseInterface.deserializeJCas(json);
-
-                try{
-                    rCas.getView(UIMADatabaseInterface.UIMADBID);
-                }
-                catch (Exception e){
-                    rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
-                }
-
-            } catch (UIMAException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
+                rCas.getView(UIMADatabaseInterface.UIMADBID);
+            } catch (Exception e) {
+                rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
             }
+
+        } catch (UIMAException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
         return rCas;
@@ -377,35 +430,33 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     public JCas getElement(String sID, String sSearch, String sReplace) {
         JCas rCas = null;
 
-            DBObject tObject = null;
-            String sFinalID = "";
-            if(sID.contains("/")){
-                sFinalID = sID.substring(sID.lastIndexOf("/")+1);
-                tObject = getDBElement(sFinalID);
-            }
-            else {
-                sFinalID = sID;
-                tObject = getDBElement(sFinalID);
-            }
+        DBObject tObject = null;
+        String sFinalID = "";
+        if (sID.contains("/")) {
+            sFinalID = sID.substring(sID.lastIndexOf("/") + 1);
+            tObject = getDBElement(sFinalID);
+        } else {
+            sFinalID = sID;
+            tObject = getDBElement(sFinalID);
+        }
 
-            String json = JSON.serialize(tObject);
-            json = json.replaceAll(sSearch, sReplace);
+        String json = JSON.serialize(tObject);
+        json = json.replaceAll(sSearch, sReplace);
+
+        try {
+            rCas = UIMADatabaseInterface.deserializeJCas(json);
 
             try {
-                rCas = UIMADatabaseInterface.deserializeJCas(json);
-
-                try{
-                    rCas.getView(UIMADatabaseInterface.UIMADBID);
-                }
-                catch (Exception e){
-                    rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
-                }
-
-            } catch (UIMAException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
+                rCas.getView(UIMADatabaseInterface.UIMADBID);
+            } catch (Exception e) {
+                rCas.createView(UIMADatabaseInterface.UIMADBID).setDocumentText(sFinalID);
             }
+
+        } catch (UIMAException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
         return rCas;
@@ -436,7 +487,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 //
 //    }
 
-    private DBObject negetDBElement(String sID){
+    private DBObject negetDBElement(String sID) {
 
         DBObject rElement = null;
 
@@ -449,7 +500,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
         dbCursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT).batchSize(1000);
 
-        while(dbCursor.hasNext()){
+        while (dbCursor.hasNext()) {
             rElement = dbCursor.next();
         }
 
@@ -458,7 +509,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     }
 
     @Override
-    public Set<JCas> getElements(String sQuery){
+    public Set<JCas> getElements(String sQuery) {
 
         Set<JCas> rCas = new HashSet<>(0);
 
@@ -469,7 +520,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         dbCursor = this.getConnection().find(qObject);
         dbCursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT).batchSize(1000);
 
-        while(dbCursor.hasNext()){
+        while (dbCursor.hasNext()) {
 
             DBObject pObject = dbCursor.next();
 
@@ -523,7 +574,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
     @Override
     public Set<JCas> getElementsByGeoLocation(String sType, double lat, double lon, double distance) {
-        JSONArray pArray = new JSONArray().put(new double[] { lon, lat }).put(new BigDecimal(distance/6371.1));
+        JSONArray pArray = new JSONArray().put(new double[]{lon, lat}).put(new BigDecimal(distance / 6371.1));
 
         final BasicDBObject geoWithhin = new BasicDBObject("$centerSphere", pArray);
 
@@ -531,7 +582,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
         final BasicDBObject query = new BasicDBObject("geo", filter);
 
-        if(sType.length()>0) {
+        if (sType.length() > 0) {
             query.put("meta.type", sType);
         }
         Set<JCas> setCas = getElements(query.toString());
@@ -547,7 +598,7 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
     @Override
     public Object getRealID(String sID) {
-        return sID.replace("_","");
+        return sID.replace("_", "");
     }
 
     @Override
@@ -559,4 +610,5 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
     public void start() {
 
     }
+
 }
