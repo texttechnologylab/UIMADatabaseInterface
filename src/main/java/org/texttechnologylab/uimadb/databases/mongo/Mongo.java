@@ -223,8 +223,6 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
 
     public String updateElementGridFS(String sMongoID, JCas jcas, @Nullable Document statistics) throws IOException, CASException {
 
-        deleteElementGridFS(sMongoID);
-
         GridFSUploadOptions options = new GridFSUploadOptions()
                 .chunkSizeBytes(358400)
                 .metadata(new Document("type", "uima"));
@@ -244,7 +242,15 @@ public class Mongo extends MongoHelper implements UIMADatabaseInterfaceService {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return uploadStream.getObjectId().toString();
+
+        // Try to get new doc ID
+        String sNewMongoID = uploadStream.getObjectId().toString();
+
+        // Delete "old" CAS document version from the database.
+        // NOTE: This was moved to the end of the function to prevent data loss if the function terminates unexpectedly.
+        deleteElementGridFS(sMongoID);
+
+        return sNewMongoID;
 
     }
 
