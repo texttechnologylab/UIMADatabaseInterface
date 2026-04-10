@@ -26,10 +26,43 @@ jobs:
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+      - name: Prepare deploy POM for GitHub Packages
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          src = 'pom.xml'
+          dst = 'pom.deploy.xml'
+
+          tree = ET.parse(src)
+          root = tree.getroot()
+
+          ns = ''
+          uri = ''
+          if root.tag.startswith('{'):
+              uri = root.tag.split('}', 1)[0][1:]
+              ns = '{' + uri + '}'
+              # Preserve the default namespace to avoid ns0-prefixed root tags.
+              ET.register_namespace('', uri)
+
+          artifact_id = root.find(f'{ns}artifactId')
+          if artifact_id is None or not (artifact_id.text or '').strip():
+              raise SystemExit('project/artifactId not found in pom.xml')
+
+          original = artifact_id.text.strip()
+          lowered = original.lower()
+          artifact_id.text = lowered
+          tree.write(dst, encoding='UTF-8', xml_declaration=True)
+
+          print(f'Prepared {dst}: artifactId {original} -> {lowered}')
+          PY
+
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
       - name: Publish to GitHub Packages Apache Maven
-        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+        run: mvn -f pom.deploy.xml deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
           GITHUB_TOKEN: ${{ github.token }}
