@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.github.texttechnologylab</groupId>
             <artifactId>UIMATypeSystem</artifactId>
-            <version>1d23e466bc</version>
+            <version>3.0.14</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
@@ -282,4 +282,12 @@
             <version>1.0.0</version>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/texttechnologylab/UIMADatabaseInterface</url>
+        </repository>
+    </distributionManagement>
 </project>
